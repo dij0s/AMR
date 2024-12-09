@@ -55,6 +55,12 @@ def test_two_dimensional_mesh_refinement(
         # check that the children all reference the same parent node
         assert all(c.parent == node for c in node.children.values())
 
+        # check that the children can access their neighbors
+        child: Node = node.children[(0, 0, None)]
+        assert child.neighbor((0, 1, None)) is not None
+        assert child.neighbor((1, 0, None)) is not None
+        assert child.neighbor((1, 1, None)) is not None
+
 
 def test_tri_dimensional_mesh_refinement(
     tri_dimensional_mesh, custom_refinement_criterium
@@ -92,3 +98,13 @@ def test_tri_dimensional_mesh_refinement(
 
         # check that the children all reference the same parent node
         assert all(c.parent == node for c in node.children.values())
+
+        # check that the children can access their neighbors
+        child: Node = node.children[(0, 0, 0)]
+        assert child.neighbor((0, 0, 1)) is not None
+        assert child.neighbor((0, 1, 0)) is not None
+        assert child.neighbor((1, 0, 0)) is not None
+        assert child.neighbor((0, 1, 1)) is not None
+        assert child.neighbor((1, 0, 1)) is not None
+        assert child.neighbor((1, 1, 0)) is not None
+        assert child.neighbor((1, 1, 1)) is not None

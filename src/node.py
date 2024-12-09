@@ -1,11 +1,11 @@
 from functools import reduce
-from typing import TYPE_CHECKING, TypeAlias
+from typing import TYPE_CHECKING, Optional, TypeAlias
 
 if TYPE_CHECKING:
     from .refinement import RefinementCriterium
 
 # Type alias for a point in the 3D space
-Point: TypeAlias = tuple[int, int, int]
+Point: TypeAlias = tuple[int, int, Optional[int]]
 
 
 class Node:
@@ -34,9 +34,9 @@ class Node:
         self._origin: Point = origin
 
         # parent node
-        self._parent: Node = parent
+        self._parent: Optional[Node] = parent
         # children nodes stored in a dictionary with the origin as key
-        self._children: dict[Point, Node] = {}
+        self._children: Optional[dict[Point, Node]] = {}
 
         # infer if the node is tri-dimensional
         self._is_tri_dimensional: bool = True if self._origin[2] is not None else False
@@ -50,6 +50,15 @@ class Node:
         """
         return f"Node(value={self._value}, level={self._level}, origin={self._origin}, parent={hash(self._parent)})"
 
+    def is_leaf(self) -> bool:
+        """
+        Method to evaluate if the node is a leaf.
+
+            Returns:
+                bool: True if the node is a leaf, False otherwise.
+        """
+        return not self._children
+
     def shall_refine(self, criterium: "RefinementCriterium") -> bool:
         """
         Method to evaluate if the node shall be refined.
@@ -62,14 +71,21 @@ class Node:
         """
         return criterium.eval(self)
 
-    def is_leaf(self) -> bool:
+    def neighbor(self, point: Point) -> Optional["Node"]:
         """
-        Method to evaluate if the node is a leaf.
+        Method to get the neighbor (same level) of the node at a given point.
+
+            Parameters:
+                point (Point): The point to evaluate the neighbor.
 
             Returns:
-                bool: True if the node is a leaf, False otherwise.
+                Optional[Node]: The neighbor node at the given point.
         """
-        return not self._children
+
+        if not self._parent:
+            return None
+        else:
+            return self._parent._children.get(point)
 
     def refine(self) -> None:
         """
@@ -108,6 +124,30 @@ class Node:
             lambda res, c: res + c.value, self._children.values(), 0.0
         ) / len(self._children)
 
+    def coarsen(self) -> None:
+        """
+        Method to coarsen the node.
+
+            Parameters:
+                None
+
+            Returns:
+                None
+        """
+
+        # coarsening is only possible if the node has children
+        if not self._children:
+            return
+
+        # set current node value
+        # to average of children values
+        self._value = reduce(
+            lambda res, c: res + c.value, self._children.values(), 0.0
+        ) / len(self._children)
+
+        # remove children
+        self._children.clear()
+
     @property
     def origin(self) -> Point:
         """
@@ -139,7 +179,7 @@ class Node:
         return self._value
 
     @property
-    def parent(self) -> "Node":
+    def parent(self) -> Optional["Node"]:
         """
         property for the parent of the node.
 
@@ -149,7 +189,7 @@ class Node:
         return self._parent
 
     @property
-    def children(self) -> dict[Point, "Node"]:
+    def children(self) -> Optional[dict[Point, "Node"]]:
         """
         property for the children of the node.
 
