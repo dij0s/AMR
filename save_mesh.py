@@ -1,17 +1,18 @@
-from random import random
+from random import gauss
 
 from src.mesh import Mesh
 from src.refinement import CustomRefinementCriterium
 
 # create uniform mesh
 # with random values
-# between 0 and 5
+# in a normal distribution
 mesh = Mesh(lx=10, ly=10)
-root = mesh.uniform(n=16, leaf_value=lambda: random() * 5.0)
+root = mesh.uniform(n=16, leaf_value=lambda: gauss(mu=0.0, sigma=1.0) + 2.5)
 
 mesh.save("mesh_t0.vtk")
 
-# refine mesh
+# refine mesh based
+# on custom criterium
 criterium = CustomRefinementCriterium(lambda node: node.value > 4.0)
 mesh.refine(criterium)
 
