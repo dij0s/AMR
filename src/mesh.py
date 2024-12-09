@@ -159,6 +159,7 @@ class Mesh:
 
         # get all leaf nodes
         leaves: list[Node] = list(self.leafs())
+        print(f"{len(leaves)} leaf nodes must be written into the file.")
 
         # Create points dictionary to avoid duplicates
         points: list[Point] = []
@@ -264,7 +265,7 @@ class Mesh:
 
         # write the VTK file
         with open(f"output/{filename}", "w") as f:
-            print(f"Writing VTK file: {filename}...")
+            print(f"Saving Mesh data into file {filename}...")
 
             # write header
             f.write("# vtk DataFile Version 3.0\n")

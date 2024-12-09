@@ -8,10 +8,9 @@ from src.refinement import CustomRefinementCriterium
 # in a normal distribution
 mesh = Mesh.uniform(
     n=16,
-    leaf_value=lambda: gauss(mu=0.0, sigma=1.0) + 2.5,
+    leaf_value=lambda: gauss(mu=2.5, sigma=1.0),
     lx=10,
     ly=10,
-    lz=10,
 )
 
 mesh.save("mesh_t0.vtk")
