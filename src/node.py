@@ -1,5 +1,5 @@
 from functools import reduce
-from typing import TYPE_CHECKING, Generator, Optional, TypeAlias
+from typing import TYPE_CHECKING, Callable, Generator, Optional, TypeAlias
 
 if TYPE_CHECKING:
     from .refinement import RefinementCriterium
@@ -87,7 +87,7 @@ class Node:
         else:
             return self._parent._children.get(point)
 
-    def refine(self) -> None:
+    def refine(self, *args, **kwargs) -> None:
         """
         Method to refine the node.
 
@@ -111,9 +111,19 @@ class Node:
         )
 
         # create children nodes
+        # check for a number generator
+        with_generator: bool = False
+        number_generator: Optional[Callable([[float], None])] = None
+        if kwargs.get("number_generator"):
+            with_generator = True
+            number_generator = kwargs.get("number_generator")
+
         self._children = {
             origin: Node(
-                value=self._value, level=self._level + 1, origin=origin, parent=self
+                value=number_generator() if with_generator else self._value,
+                level=self._level + 1,
+                origin=origin,
+                parent=self,
             )
             for origin in origins
         }
@@ -175,6 +185,27 @@ class Node:
                 Point: The origin of the node.
         """
         return self._origin
+
+    def absolute_origin(self) -> Point:
+        """
+        Method to get the absolute origin of the node.
+
+            Returns:
+                Point: The absolute origin of the node.
+        """
+
+        level_scale: float = 1 / (2**self._level)
+
+        if self._parent is None:
+            return self._origin
+        else:
+            return (
+                self._origin[0] * level_scale + self._parent.absolute_origin()[0],
+                self._origin[1] * level_scale + self._parent.absolute_origin()[1],
+                self._origin[2] * level_scale + self._parent.absolute_origin()[2]
+                if self._is_tri_dimensional
+                else None,
+            )
 
     @property
     def level(self) -> int:

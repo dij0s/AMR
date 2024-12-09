@@ -23,6 +23,8 @@ def test_quadtree_creation(mesh):
     assert node.children == {}
     assert node.is_leaf()
 
+    assert node.absolute_origin() == (0, 1, None)
+
 
 def test_octree_creation(mesh):
     """
@@ -37,3 +39,5 @@ def test_octree_creation(mesh):
     assert node.parent is None
     assert node.children == {}
     assert node.is_leaf()
+
+    assert node.absolute_origin() == (1, 1, 2)

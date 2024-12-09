@@ -25,7 +25,7 @@ def test_defined_mesh_creation(two_dimensional_mesh):
     Create a 2D mesh of defined number of nodes.
     """
     # create the "pre-refined" mesh
-    root: Node = two_dimensional_mesh.uniform(n=4, leaf_value=4.0)
+    root: Node = two_dimensional_mesh.uniform(n=4, leaf_value=lambda: 4.0)
 
     # check that the refinement created
     # the correct number of nodes in each
@@ -78,6 +78,12 @@ def test_two_dimensional_mesh_refinement(
         assert child.neighbor((1, 0, None)) is not None
         assert child.neighbor((1, 1, None)) is not None
 
+        # check that the children have the correct absolute origins
+        assert node.children[(0, 0, None)].absolute_origin() == (0, 0, None)
+        assert node.children[(0, 1, None)].absolute_origin() == (0, 0.5, None)
+        assert node.children[(1, 0, None)].absolute_origin() == (0.5, 0, None)
+        assert node.children[(1, 1, None)].absolute_origin() == (0.5, 0.5, None)
+
 
 def test_tri_dimensional_mesh_refinement(
     tri_dimensional_mesh, custom_refinement_criterium
@@ -125,3 +131,13 @@ def test_tri_dimensional_mesh_refinement(
         assert child.neighbor((1, 0, 1)) is not None
         assert child.neighbor((1, 1, 0)) is not None
         assert child.neighbor((1, 1, 1)) is not None
+
+        # check that the children have the correct absolute origins
+        assert node.children[(0, 0, 0)].absolute_origin() == (0, 0, 0)
+        assert node.children[(0, 0, 1)].absolute_origin() == (0, 0, 0.5)
+        assert node.children[(0, 1, 0)].absolute_origin() == (0, 0.5, 0)
+        assert node.children[(1, 0, 0)].absolute_origin() == (0.5, 0, 0)
+        assert node.children[(0, 1, 1)].absolute_origin() == (0, 0.5, 0.5)
+        assert node.children[(1, 0, 1)].absolute_origin() == (0.5, 0, 0.5)
+        assert node.children[(1, 1, 0)].absolute_origin() == (0.5, 0.5, 0)
+        assert node.children[(1, 1, 1)].absolute_origin() == (0.5, 0.5, 0.5)

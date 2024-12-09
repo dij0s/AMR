@@ -1,6 +1,7 @@
-from typing import Generator
+from typing import Callable, Generator
 
 from .node import Node, Point
+from .refinement import RefinementCriterium
 
 
 class Mesh:
@@ -25,13 +26,13 @@ class Mesh:
         self._ly = ly
         self._lz = lz
 
-    def uniform(self, n: int, leaf_value: float) -> Node:
+    def uniform(self, n: int, leaf_value: Callable[[float], None]) -> Node:
         """
         Create a 2D Mesh Tree of defined size.
 
             Parameters:
                 n (int): The number of nodes in the Mesh Tree (in a single dimension).
-                leaf_value (float): The value to be assigned to the leaf nodes.
+                leaf_value (Callable[float, None, None]): The value to be assigned to the leaf nodes.
 
             Returns:
                 Node: The root node of the Mesh Tree.
@@ -47,7 +48,7 @@ class Mesh:
 
         # create the root node
         origin: Point = (0, 0, None)
-        self._root = Node(value=leaf_value, level=0, origin=origin)
+        self._root = Node(value=0, level=0, origin=origin)
 
         # refine the leaf nodes
         # at each and every step
@@ -55,7 +56,7 @@ class Mesh:
         while n_refinements > 0:
             new_to_refine: list[Node] = []
             for node in to_refine:
-                node.refine()
+                node.refine(number_generator=leaf_value)
                 new_to_refine.extend(node.children.values())
             to_refine = new_to_refine
             n_refinements -= 1
@@ -81,6 +82,56 @@ class Mesh:
         self._root = Node(value=value, level=0, origin=origin)
 
         return self._root
+
+    def refine(self, criterium: RefinementCriterium) -> None:
+        """
+        Refine the Mesh Tree based on a refinement criterium.
+
+            Parameters:
+                criterium (RefinementCriterium): The refinement criterium.
+
+            Returns:
+                None
+        """
+        if not self._root:
+            raise ValueError("Mesh is empty. Cannot refine empty mesh.")
+
+        # keep track of nodes
+        # that need refinement
+        to_refine: list[Node] = []
+
+        # first pass, identify leaf
+        # nodes that need refinement
+        for leaf in self.leafs():
+            if leaf.shall_refine(criterium):
+                to_refine.append(leaf)
+
+        # second pass, refine
+        # the identified nodes
+        for node in to_refine:
+            node.refine(criterium)
+
+        # # third pass, check for possible coarsening
+        # # start from leaves and work up to
+        # # check if siblings can be coarsened
+        # siblings_map: dict[Node, list[Node]] = {}
+
+        # # group leaves by their parent
+        # for leaf in self.leafs():
+        #     if leaf.parent:
+        #         if leaf.parent not in siblings_map:
+        #             siblings_map[leaf.parent] = []
+        #         siblings_map[leaf.parent].append(leaf)
+
+        # # check each group of siblings
+        # # for possible coarsening
+        # for parent, siblings in siblings_map.items():
+        #     # only consider coarsening
+        #     # if we have all children
+        #     # for 2D mesh (would be 8 for 3D)
+        #     if len(siblings) == 4:
+        #         if all(criterium.should_coarsen(sibling) for sibling in siblings):
+        #             parent.coarsen()
 
     def leafs(self) -> Generator[Node, None, None]:
         if not self._root:
@@ -110,7 +161,7 @@ class Mesh:
         # n×n grid (2D) or n×n×n grid (3D)
         n: int = int(len(leaves) ** (1 / 2 if self._lz is None else 1 / 3))
         print(
-            f"[LOG] Number of leaves: {len(leaves)} ({n}×{n}{f'×{n}' if self._lz is not None else ''} grid)"
+            f"Number of leaves: {len(leaves)} ({n}×{n}{f'×{n}' if self._lz is not None else ''} grid)"
         )
 
         # calculate grid spacing
@@ -147,7 +198,7 @@ class Mesh:
 
         # write VTK file in output directory
         with open(f"output/{filename}", "w") as f:
-            print(f"[LOG] Writing VTK file: {filename}...")
+            print(f"Writing VTK file: {filename}...")
 
             # write header
             f.write("# vtk DataFile Version 3.0\n")
@@ -206,6 +257,8 @@ class Mesh:
             f.write("LOOKUP_TABLE default\n")
             for leaf in leaves:
                 f.write(f"{leaf.value}\n")
+
+            print("VTK file written successfully.")
 
     @property
     def root(self) -> Node:
