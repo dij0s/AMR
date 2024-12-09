@@ -6,13 +6,13 @@ class Mesh:
     A class used to create Mesh objects.
     """
 
-    def __init__(self, lx: int, ly: int, lz: int) -> None:
+    def __init__(self, lx: int, ly: int, lz: int = None) -> None:
         """
         Constructor for the Mesh class.
             Parameters:
                 lx (int): Length of the Mesh in the x-direction [-].
                 ly (int): Length of the Mesh in the y-direction [-].
-                lz (int): Length of the Mesh in the z-direction [-].
+                lz (int): Length of the Mesh in the z-direction [-]. If not provided, the Mesh is 2D.
 
             Returns:
                 None
