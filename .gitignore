@@ -11,3 +11,6 @@ wheels/
 
 # Python testing
 .pytest_cache
+
+# VTK files
+output/
