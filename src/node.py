@@ -188,10 +188,10 @@ class Node:
 
     def absolute_origin(self) -> Point:
         """
-        Method to get the absolute origin of the node.
+        Method to get the normalized absolute origin of the node.
 
             Returns:
-                Point: The absolute origin of the node.
+                Point: The normalized absolute origin of the node.
         """
 
         level_scale: float = 1 / (2**self._level)

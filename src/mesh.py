@@ -152,7 +152,8 @@ class Mesh:
         if not self._root:
             raise ValueError("Mesh is empty. Cannot save empty mesh.")
 
-        # ensure the filename has .vtk extension
+        # ensure the filename
+        # has .vtk extension
         if not filename.endswith(".vtk"):
             filename += ".vtk"
 
@@ -164,18 +165,20 @@ class Mesh:
         point_indices: dict[Point, int] = {}
         cells: list[tuple] = []
 
-        # Process each leaf node
         for leaf in leaves:
-            # Calculate cell size based on level
-            cell_size_x = self._lx / (2**leaf.level)
-            cell_size_y = self._ly / (2**leaf.level)
-            cell_size_z = self._lz / (2**leaf.level) if self._lz is not None else 0
+            # compute cell size
+            # based on level
+            cell_size_x: float = self._lx / (2**leaf.level)
+            cell_size_y: float = self._ly / (2**leaf.level)
+            cell_size_z: float = (
+                self._lz / (2**leaf.level) if self._lz is not None else 0
+            )
 
             # Get absolute origin of the cell (normalized)
-            abs_origin = leaf.absolute_origin()
+            abs_origin: Point = leaf.absolute_origin()
 
             # Scale the origin to actual dimensions
-            scaled_origin = (
+            scaled_origin: Point = (
                 abs_origin[0] * self._lx,
                 abs_origin[1] * self._ly,
                 abs_origin[2] * self._lz if self._lz is not None else 0,
@@ -183,16 +186,18 @@ class Mesh:
 
             if self._lz is None:
                 # 2D mesh
-                # Calculate the four corners of the cell
-                corners = [
+                # compute the four
+                # corners of the cell
+                corners: list[Point] = [
                     (scaled_origin[0], scaled_origin[1], 0),
                     (scaled_origin[0] + cell_size_x, scaled_origin[1], 0),
                     (scaled_origin[0] + cell_size_x, scaled_origin[1] + cell_size_y, 0),
                     (scaled_origin[0], scaled_origin[1] + cell_size_y, 0),
                 ]
 
-                # Get or create point indices
-                cell_points = []
+                # get or create
+                # point indices
+                cell_points: list[int] = []
                 for corner in corners:
                     if corner not in point_indices:
                         points.append(corner)
@@ -203,8 +208,9 @@ class Mesh:
 
             else:
                 # 3D mesh
-                # Calculate the eight corners of the cell
-                corners = [
+                # compute the eight
+                # corners of the cell
+                corners: list[Point] = [
                     (scaled_origin[0], scaled_origin[1], scaled_origin[2]),
                     (
                         scaled_origin[0] + cell_size_x,
@@ -243,8 +249,9 @@ class Mesh:
                     ),
                 ]
 
-                # Get or create point indices
-                cell_points = []
+                # get or create
+                # point indices
+                cell_points: list[int] = []
                 for corner in corners:
                     if corner not in point_indices:
                         points.append(corner)
@@ -253,40 +260,35 @@ class Mesh:
 
                 cells.append(tuple(cell_points))
 
-        # Write VTK file in output directory
-        import os
-
-        os.makedirs("output", exist_ok=True)
-
+        # write the VTK file
         with open(f"output/{filename}", "w") as f:
             print(f"Writing VTK file: {filename}...")
 
-            # Write header
+            # write header
             f.write("# vtk DataFile Version 3.0\n")
             f.write("AMR Mesh\n")
             f.write("ASCII\n")
             f.write("DATASET UNSTRUCTURED_GRID\n")
 
-            # Write points
+            # write points
             f.write(f"\nPOINTS {len(points)} float\n")
             for x, y, z in points:
                 f.write(f"{x} {y} {z}\n")
 
-            # Write cells
+            # write cells
             points_per_cell = 4 if self._lz is None else 8
             f.write(f"\nCELLS {len(cells)} {len(cells) * (points_per_cell + 1)}\n")
             for cell in cells:
                 f.write(f"{points_per_cell} {' '.join(map(str, cell))}\n")
 
-            # Write cell types
+            # write cell types
             f.write(f"\nCELL_TYPES {len(cells)}\n")
-            cell_type = (
-                9 if self._lz is None else 12
-            )  # VTK_QUAD = 9, VTK_HEXAHEDRON = 12
+            # VTK_QUAD = 9, VTK_HEXAHEDRON = 12
+            cell_type = 9 if self._lz is None else 12
             for _ in range(len(cells)):
                 f.write(f"{cell_type}\n")
 
-            # Write cell data (values)
+            # write cell data (values)
             f.write(f"\nCELL_DATA {len(cells)}\n")
             f.write("SCALARS value float 1\n")
             f.write("LOOKUP_TABLE default\n")
