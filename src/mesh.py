@@ -9,34 +9,46 @@ class Mesh:
     A class used to create Mesh objects.
     """
 
-    def __init__(self, lx: int, ly: int, lz: int = None) -> None:
+    def __init__(self, lx: float, ly: float, lz: float = None) -> None:
         """
         Constructor for the Mesh class.
             Parameters:
-                lx (int): Length of the Mesh in the x-direction [-].
-                ly (int): Length of the Mesh in the y-direction [-].
-                lz (int): Length of the Mesh in the z-direction [-]. If not provided, the Mesh is 2D.
+                lx (float): Length of the Mesh in the x-direction [-].
+                ly (float): Length of the Mesh in the y-direction [-].
+                lz (float): Length of the Mesh in the z-direction [-]. If not provided, the Mesh is 2D.
 
             Returns:
                 None
         """
-        self._root = None  # Root node of the Mesh Tree
+        self._root: Node = None
 
-        self._lx = lx
-        self._ly = ly
-        self._lz = lz
+        self._lx: int = lx
+        self._ly: int = ly
+        self._lz: int = lz
 
-    def uniform(self, n: int, leaf_value: Callable[[float], None]) -> Node:
+    @staticmethod
+    def uniform(
+        n: int,
+        leaf_value: Callable[[float], None],
+        lx: float,
+        ly: float,
+        lz: float = None,
+    ) -> "Mesh":
         """
-        Create a 2D Mesh Tree of defined size.
+        Create a Mesh Tree of uniform size.
 
             Parameters:
-                n (int): The number of nodes in the Mesh Tree (in a single dimension).
-                leaf_value (Callable[float, None, None]): The value to be assigned to the leaf nodes.
+                n (int): The number of nodes in the Mesh Tree (per dimension).
+                dimension (MeshDimension): The dimension of the Mesh Tree.
+                leaf_value (Callable[float, None, None]): The function to generate the value of the leaf nodes.
+                lx (float): Length of the Mesh in the x-direction [-].
+                ly (float): Length of the Mesh in the y-direction [-].
+                lz (float): Length of the Mesh in the z-direction [-]. If not provided, the Mesh is 2D.
 
             Returns:
-                Node: The root node of the Mesh Tree.
+                Mesh: The uniform Mesh Tree.
         """
+        mesh: Mesh = Mesh(lx=lx, ly=ly, lz=lz)
 
         # check that the provided
         # number of nodes is valid
@@ -47,21 +59,29 @@ class Mesh:
             n_refinements: int = n.bit_length() - 1
 
         # create the root node
-        origin: Point = (0, 0, None)
-        self._root = Node(value=0, level=0, origin=origin)
+        origin: Point = (0, 0, 0 if lz else None)
+        mesh._root = Node(value=0, level=0, origin=origin)
 
         # refine the leaf nodes
         # at each and every step
-        to_refine: list[Node] = [self._root]
+        # to create a uniform mesh
+        to_refine: list[Node] = [mesh._root]
         while n_refinements > 0:
             new_to_refine: list[Node] = []
+
+            # refine current nodes
             for node in to_refine:
                 node.refine(number_generator=leaf_value)
                 new_to_refine.extend(node.children.values())
+
+            # update the members to
+            # refine the children
+            # of the current nodes
             to_refine = new_to_refine
+
             n_refinements -= 1
 
-        return self._root
+        return mesh
 
     def create_root(
         self, value: float, origin_x: int, origin_y: int, origin_z: int = None
@@ -111,27 +131,7 @@ class Mesh:
         for node in to_refine:
             node.refine(criterium)
 
-        # # third pass, check for possible coarsening
-        # # start from leaves and work up to
-        # # check if siblings can be coarsened
-        # siblings_map: dict[Node, list[Node]] = {}
-
-        # # group leaves by their parent
-        # for leaf in self.leafs():
-        #     if leaf.parent:
-        #         if leaf.parent not in siblings_map:
-        #             siblings_map[leaf.parent] = []
-        #         siblings_map[leaf.parent].append(leaf)
-
-        # # check each group of siblings
-        # # for possible coarsening
-        # for parent, siblings in siblings_map.items():
-        #     # only consider coarsening
-        #     # if we have all children
-        #     # for 2D mesh (would be 8 for 3D)
-        #     if len(siblings) == 4:
-        #         if all(criterium.should_coarsen(sibling) for sibling in siblings):
-        #             parent.coarsen()
+        # check coarsening
 
     def leafs(self) -> Generator[Node, None, None]:
         if not self._root:
@@ -181,7 +181,9 @@ class Mesh:
             scaled_origin: Point = (
                 abs_origin[0] * self._lx,
                 abs_origin[1] * self._ly,
-                abs_origin[2] * self._lz if self._lz is not None else 0,
+                abs_origin[2] * self._lz
+                if self._lz is not None and abs_origin[2] is not None
+                else 0,
             )
 
             if self._lz is None:

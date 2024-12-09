@@ -25,7 +25,7 @@ def test_defined_mesh_creation(two_dimensional_mesh):
     Create a 2D mesh of defined number of nodes.
     """
     # create the "pre-refined" mesh
-    root: Node = two_dimensional_mesh.uniform(n=4, leaf_value=lambda: 4.0)
+    root: Node = Mesh.uniform(n=4, leaf_value=lambda: 4.0, lx=10, ly=10)
 
     # check that the refinement created
     # the correct number of nodes in each
