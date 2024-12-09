@@ -106,44 +106,49 @@ class Mesh:
             filename += ".vtk"
 
         # get all leaf nodes
-        leaves = list(self.leafs())
-        n = int(
-            len(leaves) ** (1 / 2 if self._lz is None else 1 / 3)
-        )  # n×n grid (2D) or n×n×n grid (3D)
+        leaves: list[Node] = list(self.leafs())
+        # n×n grid (2D) or n×n×n grid (3D)
+        n: int = int(len(leaves) ** (1 / 2 if self._lz is None else 1 / 3))
         print(
-            f"Number of leaves: {len(leaves)} ({n}×{n}{f'×{n}' if self._lz is not None else ''} grid)"
+            f"[LOG] Number of leaves: {len(leaves)} ({n}×{n}{f'×{n}' if self._lz is not None else ''} grid)"
         )
 
-        # Calculate grid spacing
-        dx = self._lx / n
-        dy = self._ly / n
-        dz = self._lz / n if self._lz is not None else 0
+        # calculate grid spacing
+        dx: float = self._lx / n
+        dy: float = self._ly / n
+        dz: float = self._lz / n if self._lz is not None else 0
 
-        # Generate all grid points
-        points = []
-        point_indices = {}  # Maps (i,j) or (i,j,k) to point index
+        # generate all grid points
+        # maps (x,y) or (x, y, z)
+        # to point index
+        points: list[Point] = []
+        point_indices: dict[tuple[int, int], int] = {}
 
         if self._lz is None:
-            # 2D mesh: Generate (n+1)×(n+1) points for n×n cells
+            # 2D mesh, generate (n+1)×(n+1)
+            # points for n² cells
             for j in range(n + 1):
                 for i in range(n + 1):
-                    x = i * dx
-                    y = j * dy
+                    x: float = i * dx
+                    y: float = j * dy
                     points.append((x, y, 0))
                     point_indices[(i, j)] = len(points) - 1
         else:
-            # 3D mesh: Generate (n+1)×(n+1)×(n+1) points for n×n×n cells
+            # 3D mesh, generate (n+1)×(n+1)×(n+1)
+            # points for n³ cells
             for k in range(n + 1):
                 for j in range(n + 1):
                     for i in range(n + 1):
-                        x = i * dx
-                        y = j * dy
-                        z = k * dz
+                        x: float = i * dx
+                        y: float = j * dy
+                        z: float = k * dz
                         points.append((x, y, z))
                         point_indices[(i, j, k)] = len(points) - 1
 
         # write VTK file in output directory
         with open(f"output/{filename}", "w") as f:
+            print(f"[LOG] Writing VTK file: {filename}...")
+
             # write header
             f.write("# vtk DataFile Version 3.0\n")
             f.write("AMR Mesh\n")
@@ -156,41 +161,42 @@ class Mesh:
                 f.write(f"{x} {y} {z}\n")
 
             # write cells
-            num_cells = n**2 if self._lz is None else n**3
-            points_per_cell = 4 if self._lz is None else 8
+            num_cells: int = n**2 if self._lz is None else n**3
+            points_per_cell: int = 4 if self._lz is None else 8
             f.write(f"\nCELLS {num_cells} {num_cells * (points_per_cell + 1)}\n")
 
             if self._lz is None:
-                # 2D mesh: Generate quad cells
+                # 2D mesh, generate quad cells
                 for j in range(n):
                     for i in range(n):
-                        # Get the four corner points of each cell
-                        p0 = point_indices[(i, j)]
-                        p1 = point_indices[(i + 1, j)]
-                        p2 = point_indices[(i + 1, j + 1)]
-                        p3 = point_indices[(i, j + 1)]
+                        # get the four corner
+                        # points of each cell
+                        p0: int = point_indices[(i, j)]
+                        p1: int = point_indices[(i + 1, j)]
+                        p2: int = point_indices[(i + 1, j + 1)]
+                        p3: int = point_indices[(i, j + 1)]
                         f.write(f"4 {p0} {p1} {p2} {p3}\n")
             else:
-                # 3D mesh: Generate hexahedron cells
+                # 3D mesh, generate hexahedron cells
                 for k in range(n):
                     for j in range(n):
                         for i in range(n):
-                            # Get the eight corner points of each cell
-                            p0 = point_indices[(i, j, k)]
-                            p1 = point_indices[(i + 1, j, k)]
-                            p2 = point_indices[(i + 1, j + 1, k)]
-                            p3 = point_indices[(i, j + 1, k)]
-                            p4 = point_indices[(i, j, k + 1)]
-                            p5 = point_indices[(i + 1, j, k + 1)]
-                            p6 = point_indices[(i + 1, j + 1, k + 1)]
-                            p7 = point_indices[(i, j + 1, k + 1)]
+                            # get the eight corner
+                            # points of each cell
+                            p0: int = point_indices[(i, j, k)]
+                            p1: int = point_indices[(i + 1, j, k)]
+                            p2: int = point_indices[(i + 1, j + 1, k)]
+                            p3: int = point_indices[(i, j + 1, k)]
+                            p4: int = point_indices[(i, j, k + 1)]
+                            p5: int = point_indices[(i + 1, j, k + 1)]
+                            p6: int = point_indices[(i + 1, j + 1, k + 1)]
+                            p7: int = point_indices[(i, j + 1, k + 1)]
                             f.write(f"8 {p0} {p1} {p2} {p3} {p4} {p5} {p6} {p7}\n")
 
             # write cell types
             f.write(f"\nCELL_TYPES {num_cells}\n")
-            cell_type = (
-                9 if self._lz is None else 12
-            )  # VTK_QUAD = 9, VTK_HEXAHEDRON = 12
+            # VTK_QUAD = 9, VTK_HEXAHEDRON = 12
+            cell_type: int = 9 if self._lz is None else 12
             for _ in range(num_cells):
                 f.write(f"{cell_type}\n")
 
