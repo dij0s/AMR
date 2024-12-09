@@ -20,6 +20,23 @@ def custom_refinement_criterium() -> CustomRefinementCriterium:
     return CustomRefinementCriterium(lambda node: node.value > 2.0)
 
 
+def test_defined_mesh_creation(two_dimensional_mesh):
+    """
+    Create a 2D mesh of defined number of nodes.
+    """
+    # create the "pre-refined" mesh
+    root: Node = two_dimensional_mesh.uniform(n=4, leaf_value=4.0)
+
+    # check that the refinement created
+    # the correct number of nodes in each
+    # direction (2d mesh of 4x4 nodes)
+    assert len(list(root.leafs())) == 16
+
+    # check that the mesh is
+    # split into 3 levels (0 is base)
+    assert all(n.level == 2 for n in root.leafs())
+
+
 def test_two_dimensional_mesh_refinement(
     two_dimensional_mesh, custom_refinement_criterium
 ):

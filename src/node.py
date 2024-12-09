@@ -1,5 +1,5 @@
 from functools import reduce
-from typing import TYPE_CHECKING, Optional, TypeAlias
+from typing import TYPE_CHECKING, Generator, Optional, TypeAlias
 
 if TYPE_CHECKING:
     from .refinement import RefinementCriterium
@@ -147,6 +147,24 @@ class Node:
 
         # remove children
         self._children.clear()
+
+    def leafs(self) -> Generator["Node", None, None]:
+        """
+        Returns a generator of all leaf nodes from current node.
+
+            Returns:
+                Generator[Node, None, None]: A generator yielding all leaf nodes.
+        """
+
+        def collect_leaves(node: Node) -> Generator[Node, None, None]:
+            if not node.children:
+                yield node
+            else:
+                for child in node.children.values():
+                    if child:
+                        yield from collect_leaves(child)
+
+        return collect_leaves(self)
 
     @property
     def origin(self) -> Point:
