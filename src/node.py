@@ -13,6 +13,18 @@ class Node:
     A class used to represent a node in a Mesh Tree.
     """
 
+    # slots for the Node class
+    # to optimize memory usage
+    # and prevent dynamic attribute
+    __slots__ = (
+        "_value",
+        "_level",
+        "_origin",
+        "_parent",
+        "_children",
+        "_is_tri_dimensional",
+    )
+
     def __init__(
         self, value: float, level: int, origin: Point, parent: "Node" = None
     ) -> None:
