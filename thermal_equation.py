@@ -1,6 +1,9 @@
+import time
+
 from src.mesh import Mesh
 from src.node import Node
 from src.refinement import CustomRefinementCriterium
+from src.scheme import SecondOrderCenteredFiniteDifferences
 
 # This script implements the
 # thermal equation and makes
@@ -15,17 +18,20 @@ from src.refinement import CustomRefinementCriterium
 N: int = 128  # number of cells per dimension
 LX: float = 10.0  # length of the domain in x [m]
 LY: float = 10.0  # length of the domain in y [m]
+DX: float = LX / N  # spatial step in x [m]
+DY: float = LY / N  # spatial step in x [m]
 
 # temporal
 T: float = 10.0  # total simulation time [s]
 DT: float = 0.01  # time step [s]
 N_STEPS: int = int(T / DT)  # number of time steps
-time: float = 0.0  # current simulation time
+simulation_time: float = 0.0  # current simulation time
 
 # material
 RHO: float = 1.204  # density [kg/m^3]
 CP: float = 1004.0  # specific heat capacity [J/kg/K]
-LAMBDA: float = 0.026  # thermal conductivity [W/m/K]
+# LAMBDA: float = 0.026  # thermal conductivity [W/m/K]
+LAMBDA: float = 0.526  # thermal conductivity [W/m/K]
 
 
 # create uniform mesh
@@ -56,36 +62,47 @@ mesh.inject(heat_source)
 # save initialized mesh
 mesh.save("mesh_t0.vtk")
 
+# create solving scheme
+solver = SecondOrderCenteredFiniteDifferences(
+    laplacian_factor=DT * LAMBDA / RHO / CP, d1=DX, d2=DY, LX=LX, LY=LY, DX=DX, DY=DY
+)
+
 # create refinement criterium
 # attention, shall implement better criterium
 # that takes into account the difference
 # in level with neighboring nodes
 criterium = CustomRefinementCriterium(lambda node: node.value > 4.0)
-mesh.refine(criterium)
+# mesh.refine(criterium)
+
+# benchmark the time
+start = time.time()
 
 # iterate over time
-# for step in range(1,N_STEPS):
-for step in range(1, 51):
+for step in range(1, N_STEPS):
+    # for step in range(1, 51):
     # simulation time increases
-    time += DT
+    simulation_time += DT
 
     # solve the thermal equation
-    ...
+    mesh.solve(solver)
 
     # refine and save mesh
     # every 50 steps
     if step % 50 == 0:
-        print(f"Step {step} / {N_STEPS}, current simulation time: {time:.3}s")
+        print(
+            f"Step {step} / {N_STEPS}, current simulation time: {simulation_time:.3}s"
+        )
 
         # apply refinement criterium
         # mesh.refine(criterium)
 
-        # solve the thermal equation
-        mesh.solve(solver)
-
         # save mesh state
-        # mesh.save(f"mesh_t{step}.vtk")
+        mesh.save(f"mesh_t{step:04}.vtk")
 
     # continuous energy injection
     # into the domain
     mesh.inject(heat_source)
+
+# benchmark the time
+elapsed = time.time() - start
+print(f"Elapsed time: {elapsed:.3}s")
