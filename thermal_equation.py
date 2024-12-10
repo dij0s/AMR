@@ -2,7 +2,7 @@ import time
 
 from src.mesh import Mesh
 from src.node import Node
-from src.refinement import CustomRefinementCriterium
+from src.refinement import GradientRefinementCriterium
 from src.scheme import SecondOrderCenteredFiniteDifferences
 
 # This script implements the
@@ -15,7 +15,7 @@ from src.scheme import SecondOrderCenteredFiniteDifferences
 # of the model
 
 # spatial
-N: int = 128  # number of cells per dimension
+N: int = 64  # number of cells per dimension
 LX: float = 10.0  # length of the domain in x [m]
 LY: float = 10.0  # length of the domain in y [m]
 DX: float = LX / N  # spatial step in x [m]
@@ -28,14 +28,17 @@ N_STEPS: int = int(T / DT)  # number of time steps
 simulation_time: float = 0.0  # current simulation time
 
 # material
-RHO: float = 1.204  # density [kg/m^3]
-CP: float = 1004.0  # specific heat capacity [J/kg/K]
+# RHO: float = 1.204  # density [kg/m^3]
+# CP: float = 1004.0  # specific heat capacity [J/kg/K]
 # LAMBDA: float = 0.026  # thermal conductivity [W/m/K]
-LAMBDA: float = 0.526  # thermal conductivity [W/m/K]
+#
+RHO: float = 0.06  # density [kg/m^3]
+CP: float = 204.0  # specific heat capacity [J/kg/K]
+LAMBDA: float = 1.026  # thermal conductivity [W/m/K]
 
 
 # create uniform mesh
-mesh = Mesh.uniform(n=N, lx=LX, ly=LY, leaf_value=0.0)
+mesh = Mesh.uniform(n=N, lx=LX, ly=LY, leaf_value=lambda: 5.0)
 
 
 # inject values into tree
@@ -54,7 +57,7 @@ def heat_source(node: Node) -> None:
     # if point is within circle
     # of radius of 2.0 [m]
     if radius <= 2.0:
-        node.value = 5.0
+        node.value = 60.0  # [°C]
 
 
 mesh.inject(heat_source)
@@ -68,18 +71,15 @@ solver = SecondOrderCenteredFiniteDifferences(
 )
 
 # create refinement criterium
-# attention, shall implement better criterium
-# that takes into account the difference
-# in level with neighboring nodes
-criterium = CustomRefinementCriterium(lambda node: node.value > 4.0)
-# mesh.refine(criterium)
+# based on the gradient change
+criterium = GradientRefinementCriterium(threshold=0.5)
 
 # benchmark the time
 start = time.time()
 
 # iterate over time
 for step in range(1, N_STEPS):
-    # for step in range(1, 51):
+    # for step in range(1, 151):
     # simulation time increases
     simulation_time += DT
 
@@ -94,7 +94,7 @@ for step in range(1, N_STEPS):
         )
 
         # apply refinement criterium
-        # mesh.refine(criterium)
+        mesh.refine(criterium, max_depth=2)
 
         # save mesh state
         mesh.save(f"mesh_t{step:04}.vtk")

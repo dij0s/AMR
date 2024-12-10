@@ -258,6 +258,25 @@ class Node:
                 None
         """
 
+        def interpolate(value: float, child_origin: Point) -> float:
+            """
+            Helper function to interpolate the value of the children nodes.
+            """
+            x, y, z = child_origin
+            center_distance = (
+                (x - 1) ** 2 + (y - 1) ** 2 + (0 if z is None else (z - 1) ** 2)
+            ) ** 0.5
+            # maximum distance from center
+            # in 2D is sqrt(2) ≈ 1.414
+            # maximum distance from center
+            # in 3D is sqrt(3) ≈ 1.732
+            max_distance = 1.732 if self._is_tri_dimensional else 1.414
+
+            # normalize distance to [0,1]
+            # range and apply variation
+            normalized_distance = center_distance / max_distance
+            return value * (1 + (1 - normalized_distance))
+
         # refinement criterium must be
         # applied beforehand and is
         # assumed to be True
@@ -278,15 +297,33 @@ class Node:
             with_generator = True
             number_generator = kwargs.get("number_generator")
 
-        self._children = {
-            origin: Node(
-                value=number_generator() if with_generator else self._value,
-                level=self._level + 1,
-                origin=origin,
-                parent=self,
-            )
-            for origin in origins
-        }
+        if with_generator:
+            self._children = {
+                origin: Node(
+                    value=number_generator(),
+                    level=self._level + 1,
+                    origin=origin,
+                    parent=self,
+                )
+                for origin in origins
+            }
+        else:
+            # interpolate the value
+            # of the children nodes
+            # (linearly)
+            children_values: list[float] = [
+                interpolate(self._value, origin) for origin in origins
+            ]
+
+            self._children = {
+                origin: Node(
+                    value=child_value,
+                    level=self._level + 1,
+                    origin=origin,
+                    parent=self,
+                )
+                for (origin, child_value) in zip(origins, children_values)
+            }
 
         # set current node value
         # to average of children values

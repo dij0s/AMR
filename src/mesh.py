@@ -27,6 +27,8 @@ class Mesh:
         self._ly: int = ly
         self._lz: int = lz
 
+        self._current_leaf_level: int = 0
+
     @staticmethod
     def uniform(
         n: int,
@@ -104,7 +106,7 @@ class Mesh:
 
         return self._root
 
-    def refine(self, criterium: RefinementCriterium) -> None:
+    def refine(self, criterium: RefinementCriterium, max_depth: int = None) -> None:
         """
         Refine the Mesh Tree based on a refinement criterium.
 
@@ -116,6 +118,18 @@ class Mesh:
         """
         if not self._root:
             raise ValueError("Mesh is empty. Cannot refine empty mesh.")
+
+        # ATTENTION,
+        # MAYBE NEED TO CHECK
+        # MAX DEPTH PER LEAF
+        # SO THAT COARSENING
+        # ALLOWS FOR FUTURE
+        # REFINEMENT !
+        if max_depth:
+            # limit the refinement
+            # to a maximum level delta
+            if self._current_leaf_level >= max_depth:
+                return
 
         # keep track of nodes
         # that need refinement
@@ -132,7 +146,11 @@ class Mesh:
         for node in to_refine:
             node.refine(criterium)
 
+        # record the current leaf level
+        self._current_leaf_level += 1
+
         # check coarsening
+        # of parent nodes
 
     def inject(self, f: Callable[[Node], None]) -> None:
         """

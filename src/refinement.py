@@ -1,8 +1,10 @@
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Callable
 
+from src.node import Direction
+
 if TYPE_CHECKING:
-    from .node import Node
+    from src.node import Node
 
 
 class RefinementCriterium(ABC):
@@ -37,3 +39,52 @@ class CustomRefinementCriterium(RefinementCriterium):
 
     def eval(self, node: "Node") -> bool:
         return self._f(node)
+
+
+class GradientRefinementCriterium(RefinementCriterium):
+    """
+    A class used to define a gradient refinement criterium.
+    """
+
+    def __init__(self, threshold: float) -> None:
+        """
+        Constructor for the GradientRefinementCriterium class.
+
+            Parameters:
+                threshold (float): The threshold value for the gradient refinement criterium. Value between 0 and 1 representing the percentage as decimal (e.g., 0.8 = 80%).
+
+            Returns:
+                None
+        """
+        self._threshold: float = threshold
+
+    def eval(self, node: "Node") -> bool:
+        # compute the gradient
+        # of the given node
+
+        # get neighboring nodes
+        # in all directions
+        neighbors: list["Node"] = [
+            node.neighbor(Direction.RIGHT),
+            node.neighbor(Direction.LEFT),
+            node.neighbor(Direction.UP),
+            node.neighbor(Direction.DOWN),
+        ]
+
+        # filter out None neighbors
+        valid_neighbors: list["Node"] = [n for n in neighbors if n is not None]
+        if not valid_neighbors:
+            return False
+
+        # compute maximum gradient
+        # between node and its neighbors
+        max_gradient: float = max(
+            abs(node.value - neighbor.value) for neighbor in valid_neighbors
+        )
+        # calculate relative gradient
+        relative_gradient: float = abs(max_gradient / max(node.value, 1e-6))
+
+        # return if absolute
+        # percentage gradient
+        # exceeds threshold
+        return relative_gradient > self._threshold
