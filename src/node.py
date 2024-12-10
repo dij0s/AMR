@@ -142,7 +142,34 @@ class Node:
             Returns:
                 bool: True if the node shall be refined, False otherwise.
         """
-        return criterium.eval(self)
+        if not criterium.eval(self):
+            return False
+
+        # check neighboring cells
+        # levels to determine if
+        # the node can be refined
+        neighbors: list[Node] = [
+            self.neighbor(Direction.RIGHT),
+            self.neighbor(Direction.LEFT),
+            self.neighbor(Direction.UP),
+            self.neighbor(Direction.DOWN),
+        ]
+
+        # only allow refinement
+        # if no neighbor is more
+        # than one level coarser
+        for neighbor in neighbors:
+            if neighbor and neighbor.level + 1 < self.level:
+                return False
+
+        # hence, the node can be refined
+        # up to one level higher than
+        # the coarsest neighbor as
+        # the condition herebefore is met
+        # as soon as one neighbor is more
+        # than one level coarser
+
+        return True
 
     def neighbor(self, direction: Direction) -> Optional["Node"]:
         """
