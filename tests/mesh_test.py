@@ -25,7 +25,13 @@ def test_defined_mesh_creation(two_dimensional_mesh):
     Create a 2D mesh of defined number of nodes.
     """
     # create the "pre-refined" mesh
-    mesh: Mesh = Mesh.uniform(n=4, leaf_value=lambda: 4.0, lx=10, ly=10)
+    N: int = 4
+    LX: float = 10.0
+    LY: float = 10.0
+    DX: float = LX / N
+    DY: float = LX / N
+
+    mesh: Mesh = Mesh.uniform(n=N, leaf_value=lambda: 4.0, lx=LX, ly=LY)
 
     # check that the refinement created
     # the correct number of nodes in each
@@ -47,6 +53,13 @@ def test_defined_mesh_creation(two_dimensional_mesh):
     # all the leaf nodes is 1
     assert all(n.value == 1 for n in mesh.leafs())
 
+    # check that there are
+    # exactly 12 border nodes
+    assert (
+        len([n for n in mesh.leafs() if n.is_on_border(LX, LY, None, DX, DY, None)])
+        == 12
+    )
+
 
 def test_two_dimensional_mesh_refinement(
     two_dimensional_mesh, custom_refinement_criterium
@@ -54,6 +67,7 @@ def test_two_dimensional_mesh_refinement(
     """
     Refine a node in the 2D mesh according to a custom refinement criterium.
     """
+
     # create a root node in a two-dimensional mesh
     node: Node = two_dimensional_mesh.create_root(value=4.0, origin_x=0, origin_y=0)
     shall_refine: bool = node.shall_refine(custom_refinement_criterium)
@@ -85,9 +99,9 @@ def test_two_dimensional_mesh_refinement(
 
         # check that the children can access their neighbors
         child: Node = node.children[(0, 0, None)]
-        assert child.neighbor((0, 1, None)) is not None
-        assert child.neighbor((1, 0, None)) is not None
-        assert child.neighbor((1, 1, None)) is not None
+        assert child.adjacent((0, 1, None)) is not None
+        assert child.adjacent((1, 0, None)) is not None
+        assert child.adjacent((1, 1, None)) is not None
 
         # check that the children have the correct absolute origins
         assert node.children[(0, 0, None)].absolute_origin == (0, 0, None)
@@ -135,13 +149,13 @@ def test_tri_dimensional_mesh_refinement(
 
         # check that the children can access their neighbors
         child: Node = node.children[(0, 0, 0)]
-        assert child.neighbor((0, 0, 1)) is not None
-        assert child.neighbor((0, 1, 0)) is not None
-        assert child.neighbor((1, 0, 0)) is not None
-        assert child.neighbor((0, 1, 1)) is not None
-        assert child.neighbor((1, 0, 1)) is not None
-        assert child.neighbor((1, 1, 0)) is not None
-        assert child.neighbor((1, 1, 1)) is not None
+        assert child.adjacent((0, 0, 1)) is not None
+        assert child.adjacent((0, 1, 0)) is not None
+        assert child.adjacent((1, 0, 0)) is not None
+        assert child.adjacent((0, 1, 1)) is not None
+        assert child.adjacent((1, 0, 1)) is not None
+        assert child.adjacent((1, 1, 0)) is not None
+        assert child.adjacent((1, 1, 1)) is not None
 
         # check that the children have the correct absolute origins
         assert node.children[(0, 0, 0)].absolute_origin == (0, 0, 0)

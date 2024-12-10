@@ -1,3 +1,4 @@
+from enum import Enum, auto
 from functools import reduce
 from typing import TYPE_CHECKING, Callable, Generator, Optional, TypeAlias
 
@@ -6,6 +7,17 @@ if TYPE_CHECKING:
 
 # Type alias for a point in the 3D space
 Point: TypeAlias = tuple[int, int, Optional[int]]
+
+
+class Direction(Enum):
+    """
+    Helper class to represent the direction of a neighbor.
+    """
+
+    RIGHT = auto()
+    LEFT = auto()
+    UP = auto()
+    DOWN = auto()
 
 
 class Node:
@@ -22,8 +34,9 @@ class Node:
         "_origin",
         "_parent",
         "_children",
-        "_is_tri_dimensional",
         "_absolute_origin",
+        "_is_tri_dimensional",
+        "_is_on_border",
     )
 
     def __init__(
@@ -57,6 +70,9 @@ class Node:
         # compute the absolute origin of the node
         self._absolute_origin: Point = self._compute_absolute_origin()
 
+        # check if the node is on the border
+        self._is_on_border: Optional[bool] = None
+
     def __repr__(self) -> str:
         """
         Method to represent the node as a string.
@@ -75,6 +91,47 @@ class Node:
         """
         return not self._children
 
+    def is_on_border(
+        self,
+        lx: float,
+        ly: float,
+        lz: Optional[float],
+        dx: float,
+        dy: float,
+        dz: Optional[float],
+    ) -> bool:
+        """
+        Method to evaluate if the node is on the border.
+        Memoization is used to store the result.
+
+            Parameters:
+                lx (float): The length of the domain in the x-axis.
+                ly (float): The length of the domain in the y-axis.
+                lz (Optional[float]): The length of the domain in the z-axis.
+                dx (float): The discretization step in the x-axis.
+                dy (float): The discretization step in the y-axis.
+                dz (Optional[float]): The discretization step in the z-axis.
+
+            Returns:
+                bool: True if the node is on the border, False otherwise.
+        """
+        if self._is_on_border:
+            return self._is_on_border
+        else:
+            x, y, z = self._absolute_origin
+            x = x * lx
+            y = y * ly
+            z = z * lz if z is not None else None
+
+            self._is_on_border = (
+                x == 0.0
+                or x == lx - dx
+                or y == 0.0
+                or y == ly - dy
+                or (z is not None and (z == 0.0 or z == lz - dz))
+            )
+            return self._is_on_border
+
     def shall_refine(self, criterium: "RefinementCriterium") -> bool:
         """
         Method to evaluate if the node shall be refined.
@@ -87,15 +144,102 @@ class Node:
         """
         return criterium.eval(self)
 
-    def neighbor(self, point: Point) -> Optional["Node"]:
+    def neighbor(self, direction: Direction) -> Optional["Node"]:
         """
-        Method to get the neighbor (same level) of the node at a given point.
+        Method to get the neighbor of the node in a given direction.
+        It retrieves the neighbor in given direction of same level or parent node.
+        Only supports two-dimensional directions.
+
+            Parameters:
+                direction (Direction): The direction to evaluate the neighbor.
+
+            Returns:
+                Optional[Node]: The neighbor node in the given direction.
+        """
+        if not self._parent:
+            return None
+
+        # first check if there's a
+        # same-level neighbor in
+        # parent's children
+        x, y, z = self._origin
+        adjacent_origin: Point = None
+
+        match direction:
+            case Direction.RIGHT:
+                adjacent_origin = (x + 1, y, None)
+            case Direction.LEFT:
+                adjacent_origin = (x - 1, y, None)
+            case Direction.UP:
+                adjacent_origin = (x, y - 1, None)
+            case Direction.DOWN:
+                adjacent_origin = (x, y + 1, None)
+
+        # try to find same-level
+        # neighbor in current parent
+        adjacent_node: Optional[Node] = self._parent._children.get(adjacent_origin)
+        if adjacent_node:
+            return adjacent_node
+
+        # if no same-level neighbor
+        # found, look in parent's
+        # siblings
+        # determine which edge of
+        # parent cell we're at
+        at_parent_edge: bool = False
+
+        match direction:
+            case Direction.RIGHT:
+                at_parent_edge = x == 1
+            case Direction.LEFT:
+                at_parent_edge = x == 0
+            case Direction.UP:
+                at_parent_edge = y == 0
+            case Direction.DOWN:
+                at_parent_edge = y == 1
+
+        # if we're not at parent's
+        # edge, no neighbor exists
+        if not at_parent_edge:
+            return None
+
+        # get parent's neighbor
+        parent_neighbor: Optional[Node] = self._parent.neighbor(direction)
+        if not parent_neighbor:
+            return None
+
+        # if parent's neighbor
+        # has no children, return
+        # it (it is one level lower)
+        if parent_neighbor.is_leaf():
+            return parent_neighbor
+
+        # find the matching child
+        # in parent's neighbor
+        # need to mirror the coordinates
+        # for the opposite edge
+        neighbor_x, neighbor_y = x, y
+        match direction:
+            case Direction.RIGHT:
+                neighbor_x = 0
+            case Direction.LEFT:
+                neighbor_x = 1
+            case Direction.UP:
+                neighbor_y = 1
+            case Direction.DOWN:
+                neighbor_y = 0
+
+        return parent_neighbor._children.get((neighbor_x, neighbor_y, None))
+
+    def adjacent(self, point: Point) -> Optional["Node"]:
+        """
+        Method to get the adjacent neighbor (same level) of the node at a given point.
 
             Parameters:
                 point (Point): The point to evaluate the neighbor.
 
             Returns:
-                Optional[Node]: The neighbor node at the given point.
+                Optional[Node]: The neighbor adjacent node at the given point.
         """
 
         if not self._parent:
@@ -238,6 +382,25 @@ class Node:
                 if self._is_tri_dimensional
                 else None,
             )
+
+    def copy(self) -> "Node":
+        """
+        Method to copy the node.
+        Attention, it is only available to leaf nodes
+        as children nodes are not copied !
+
+            Returns:
+                Node: A copy of the node.
+        """
+        if self.children:
+            raise ValueError("Only leaf nodes can be copied.")
+
+        return Node(
+            value=self._value,
+            level=self._level,
+            origin=self._origin,
+            parent=self._parent,
+        )
 
     @property
     def level(self) -> int:

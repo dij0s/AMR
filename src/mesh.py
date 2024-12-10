@@ -2,6 +2,7 @@ from typing import Callable, Generator
 
 from .node import Node, Point
 from .refinement import RefinementCriterium
+from .scheme import NumericalScheme
 
 
 class Mesh:
@@ -147,6 +148,23 @@ class Mesh:
             raise ValueError("Mesh is empty. Cannot inject function into empty mesh.")
 
         self._root.inject(f)
+
+    def solve(self, scheme: NumericalScheme) -> None:
+        """
+        Solve the Mesh Tree using a numerical scheme.
+
+            Parameters:
+                scheme (NumericalScheme): The numerical scheme to solve the Mesh Tree.
+
+            Returns:
+                None
+        """
+        if not self._root:
+            raise ValueError("Mesh is empty. Cannot solve empty mesh.")
+
+        # solver shall be applied
+        # to the list of leaf nodes
+        scheme.apply(list(self.leafs()))
 
     def leafs(self) -> Generator[Node, None, None]:
         if not self._root:
