@@ -23,6 +23,7 @@ class Node:
         "_parent",
         "_children",
         "_is_tri_dimensional",
+        "_absolute_origin",
     )
 
     def __init__(
@@ -52,6 +53,9 @@ class Node:
 
         # infer if the node is tri-dimensional
         self._is_tri_dimensional: bool = True if self._origin[2] is not None else False
+
+        # compute the absolute origin of the node
+        self._absolute_origin: Point = self._compute_absolute_origin()
 
     def __repr__(self) -> str:
         """
@@ -198,7 +202,7 @@ class Node:
         """
         return self._origin
 
-    def absolute_origin(self) -> Point:
+    def _compute_absolute_origin(self) -> Point:
         """
         Method to get the normalized absolute origin of the node.
 
@@ -212,9 +216,9 @@ class Node:
             return self._origin
         else:
             return (
-                self._origin[0] * level_scale + self._parent.absolute_origin()[0],
-                self._origin[1] * level_scale + self._parent.absolute_origin()[1],
-                self._origin[2] * level_scale + self._parent.absolute_origin()[2]
+                self._origin[0] * level_scale + self._parent.absolute_origin[0],
+                self._origin[1] * level_scale + self._parent.absolute_origin[1],
+                self._origin[2] * level_scale + self._parent.absolute_origin[2]
                 if self._is_tri_dimensional
                 else None,
             )
@@ -258,3 +262,13 @@ class Node:
                 dict[Point, Node]: The children of the node.
         """
         return self._children
+
+    @property
+    def absolute_origin(self) -> Point:
+        """
+        property for the absolute origin of the node.
+
+            Returns:
+                Point: The absolute origin of the node.
+        """
+        return self._absolute_origin

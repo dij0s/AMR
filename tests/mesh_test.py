@@ -79,10 +79,10 @@ def test_two_dimensional_mesh_refinement(
         assert child.neighbor((1, 1, None)) is not None
 
         # check that the children have the correct absolute origins
-        assert node.children[(0, 0, None)].absolute_origin() == (0, 0, None)
-        assert node.children[(0, 1, None)].absolute_origin() == (0, 0.5, None)
-        assert node.children[(1, 0, None)].absolute_origin() == (0.5, 0, None)
-        assert node.children[(1, 1, None)].absolute_origin() == (0.5, 0.5, None)
+        assert node.children[(0, 0, None)].absolute_origin == (0, 0, None)
+        assert node.children[(0, 1, None)].absolute_origin == (0, 0.5, None)
+        assert node.children[(1, 0, None)].absolute_origin == (0.5, 0, None)
+        assert node.children[(1, 1, None)].absolute_origin == (0.5, 0.5, None)
 
 
 def test_tri_dimensional_mesh_refinement(
@@ -133,11 +133,11 @@ def test_tri_dimensional_mesh_refinement(
         assert child.neighbor((1, 1, 1)) is not None
 
         # check that the children have the correct absolute origins
-        assert node.children[(0, 0, 0)].absolute_origin() == (0, 0, 0)
-        assert node.children[(0, 0, 1)].absolute_origin() == (0, 0, 0.5)
-        assert node.children[(0, 1, 0)].absolute_origin() == (0, 0.5, 0)
-        assert node.children[(1, 0, 0)].absolute_origin() == (0.5, 0, 0)
-        assert node.children[(0, 1, 1)].absolute_origin() == (0, 0.5, 0.5)
-        assert node.children[(1, 0, 1)].absolute_origin() == (0.5, 0, 0.5)
-        assert node.children[(1, 1, 0)].absolute_origin() == (0.5, 0.5, 0)
-        assert node.children[(1, 1, 1)].absolute_origin() == (0.5, 0.5, 0.5)
+        assert node.children[(0, 0, 0)].absolute_origin == (0, 0, 0)
+        assert node.children[(0, 0, 1)].absolute_origin == (0, 0, 0.5)
+        assert node.children[(0, 1, 0)].absolute_origin == (0, 0.5, 0)
+        assert node.children[(1, 0, 0)].absolute_origin == (0.5, 0, 0)
+        assert node.children[(0, 1, 1)].absolute_origin == (0, 0.5, 0.5)
+        assert node.children[(1, 0, 1)].absolute_origin == (0.5, 0, 0.5)
+        assert node.children[(1, 1, 0)].absolute_origin == (0.5, 0.5, 0)
+        assert node.children[(1, 1, 1)].absolute_origin == (0.5, 0.5, 0.5)

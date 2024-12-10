@@ -6,17 +6,16 @@ from src.refinement import CustomRefinementCriterium
 # create uniform mesh
 # with random values
 # in a normal distribution
-mesh = Mesh.uniform(
-    n=16,
-    leaf_value=lambda: gauss(mu=2.5, sigma=1.0),
-    lx=10,
-    ly=10,
-)
+mesh = Mesh.uniform(n=16, leaf_value=lambda: gauss(mu=2.5, sigma=1.0), lx=10, ly=10)
 
 mesh.save("mesh_t0.vtk")
 
 # refine mesh based
 # on custom criterium
+#
+# attention, shall implement better criterium
+# that takes into account the difference
+# in level with neighboring nodes
 criterium = CustomRefinementCriterium(lambda node: node.value > 4.0)
 mesh.refine(criterium)
 
