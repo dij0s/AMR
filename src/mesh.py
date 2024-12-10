@@ -133,6 +133,21 @@ class Mesh:
 
         # check coarsening
 
+    def inject(self, f: Callable[[Node], None]) -> None:
+        """
+        Inject a function into the Mesh Tree. It is applied to each node of the Mesh Tree recursively.
+
+            Parameters:
+                f (Callable[[Node], None]): The function to inject into the Mesh Tree.
+
+            Returns:
+                None
+        """
+        if not self._root:
+            raise ValueError("Mesh is empty. Cannot inject function into empty mesh.")
+
+        self._root.inject(f)
+
     def leafs(self) -> Generator[Node, None, None]:
         if not self._root:
             raise ValueError("Mesh is empty. Cannot get leafs of empty mesh.")
@@ -175,15 +190,12 @@ class Mesh:
                 self._lz / (2**leaf.level) if self._lz is not None else 0
             )
 
-            # Get absolute origin of the cell (normalized)
-            abs_origin: Point = leaf.absolute_origin()
-
             # Scale the origin to actual dimensions
             scaled_origin: Point = (
-                abs_origin[0] * self._lx,
-                abs_origin[1] * self._ly,
-                abs_origin[2] * self._lz
-                if self._lz is not None and abs_origin[2] is not None
+                leaf.absolute_origin[0] * self._lx,
+                leaf.absolute_origin[1] * self._ly,
+                leaf.absolute_origin[2] * self._lz
+                if self._lz is not None and leaf.absolute_origin[2] is not None
                 else 0,
             )
 

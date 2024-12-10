@@ -174,6 +174,22 @@ class Node:
         # remove children
         self._children.clear()
 
+    def inject(self, f: Callable[["Node"], None]) -> None:
+        """
+        Method to inject a function on the node.
+
+            Parameters:
+                f (Callable[[Node], None]): The function to inject.
+
+            Returns:
+                None
+        """
+        # apply function on current node
+        f(self)
+        # apply function on children nodes
+        for child in self._children.values():
+            child.inject(f)
+
     def leafs(self) -> Generator["Node", None, None]:
         """
         Returns a generator of all leaf nodes from current node.
@@ -242,6 +258,19 @@ class Node:
                 float: The value of the node.
         """
         return self._value
+
+    @value.setter
+    def value(self, value: float) -> None:
+        """
+        Setter for the value of the node.
+
+            Parameters:
+                value (float): The value to set.
+
+            Returns:
+                None
+        """
+        self._value = value
 
     @property
     def parent(self) -> Optional["Node"]:
