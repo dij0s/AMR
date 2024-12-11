@@ -270,6 +270,8 @@ class Node:
         def interpolate(value: float, child_origin: Point) -> float:
             """
             Helper function to interpolate the value of the children nodes.
+            It applies a linear interpolation based on the distance from the
+            center of the node which holds the value.
             """
             x, y, z = child_origin
             center_distance = (
@@ -288,7 +290,7 @@ class Node:
 
         # refinement criterium must be
         # applied beforehand and is
-        # assumed to be True
+        # assumed to be True at this point
 
         # create children origins
         # for a two or three dimensional node

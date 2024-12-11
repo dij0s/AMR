@@ -160,8 +160,8 @@ class Mesh:
             node.refine(criterium)
 
         # coarsen the identified nodes
-        for node in to_coarsen:
-            node.coarsen()
+        # for node in to_coarsen:
+        #     node.coarsen()
 
     def inject(self, f: Callable[[Node], None]) -> None:
         """

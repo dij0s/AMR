@@ -94,6 +94,35 @@ def test_node_localization(heterogeneous_mesh):
     left_node = downmost_right_node.neighbor(Direction.LEFT)
     assert downmost_right_node.level == left_node.level
 
+    # now considering the node
+    # at the downmost left
+    # of the coarses mesh
+    downmost_left_node = heterogeneous_mesh.root.children[(0, 1, None)]
+
+    # check localization of left
+    # node, must not be found
+    # as the node is on border
+    left_node = downmost_left_node.neighbor(Direction.LEFT)
+    assert left_node is None
+
+    # check localization of bottom
+    # node, must not be found
+    # as the node is on border
+    bottom_node = downmost_left_node.neighbor(Direction.DOWN)
+    assert bottom_node is None
+
+    # check localization of right
+    # node, must be found and be
+    # a node of same level
+    right_node = downmost_left_node.neighbor(Direction.RIGHT)
+    assert downmost_left_node.level == right_node.level
+
+    # check localization of top
+    # node, must be found but be
+    # of lower level
+    top_node = downmost_left_node.neighbor(Direction.UP)
+    assert not top_node.is_leaf()
+
 
 def test_quadtree_creation(mesh):
     """

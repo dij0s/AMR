@@ -93,7 +93,7 @@ for step in range(1, N_STEPS):
         )
 
         # apply refinement criterium
-        mesh.refine(criterium, max_depth=2)
+        # mesh.refine(criterium, max_depth=2)
 
         # save mesh state
         mesh.save(f"mesh_t{step:04}.vtk")
@@ -104,4 +104,4 @@ for step in range(1, N_STEPS):
 
 # benchmark the time
 elapsed = time.time() - start
-print(f"Elapsed time: {elapsed:.3}s")
+print(f"Elapsed time: {int(elapsed)}s")
