@@ -15,7 +15,7 @@ from src.scheme import SecondOrderCenteredFiniteDifferences
 # of the model
 
 # spatial
-N: int = 128  # number of cells per dimension
+N: int = 64  # number of cells per dimension
 LX: float = 10.0  # length of the domain in x [m]
 LY: float = 10.0  # length of the domain in y [m]
 DX: float = LX / N  # spatial step in x [m]
@@ -93,7 +93,7 @@ for step in range(1, N_STEPS):
         )
 
         # apply refinement criterium
-        # mesh.refine(criterium, max_depth=2)
+        mesh.refine(criterium, max_depth=2)
 
         # save mesh state
         mesh.save(f"mesh_t{step:04}.vtk")

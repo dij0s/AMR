@@ -190,9 +190,6 @@ class Node:
         if adjacent_node:
             return adjacent_node
 
-        # if no same-level neighbor
-        # found, look in parent's
-        # siblings
         # determine which edge of
         # parent cell we're at
         at_parent_edge: bool = False
@@ -217,9 +214,8 @@ class Node:
         if not parent_neighbor:
             return None
 
-        # if parent's neighbor
-        # has no children, return
-        # it (it is one level lower)
+        # if parent's neighbor has no children,
+        # return it (it is one level lower)
         if parent_neighbor.is_leaf():
             return parent_neighbor
 
@@ -238,7 +234,31 @@ class Node:
             case Direction.DOWN:
                 neighbor_y = 0
 
-        return parent_neighbor._children.get((neighbor_x, neighbor_y, None))
+        neighbor_node = parent_neighbor._children.get((neighbor_x, neighbor_y, None))
+
+        # If the neighbor node has children and is at a lower level than current node,
+        # traverse down to find the appropriate child
+        while (
+            neighbor_node
+            and neighbor_node.level < self.level
+            and not neighbor_node.is_leaf()
+        ):
+            # Calculate which child to select based on position
+            child_x = neighbor_x
+            child_y = neighbor_y
+            match direction:
+                case Direction.RIGHT:
+                    child_x = 0
+                case Direction.LEFT:
+                    child_x = 1
+                case Direction.UP:
+                    child_y = 1
+                case Direction.DOWN:
+                    child_y = 0
+
+            neighbor_node = neighbor_node._children.get((child_x, child_y, None))
+
+        return neighbor_node
 
     def adjacent(self, point: Point) -> Optional["Node"]:
         """
