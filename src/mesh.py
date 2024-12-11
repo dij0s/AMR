@@ -1,4 +1,4 @@
-from typing import Callable, Generator
+from typing import Callable, Generator, Optional
 
 from .node import Node, Point
 from .refinement import RefinementCriterium
@@ -125,13 +125,12 @@ class Mesh:
         # SO THAT COARSENING
         # ALLOWS FOR FUTURE
         # REFINEMENT !
-        if max_depth:
-            # limit the refinement
-            # to a maximum level delta
-            if self._current_leaf_level >= max_depth:
-                return
+        # limit the refinement
+        # to a maximum level delta
+        if max_depth and self._current_leaf_level >= max_depth:
+            return
 
-        leafs: list[Node] = list(self.leafs())
+        leaves: list[Node] = list(self.leafs())
 
         # keep track of nodes
         # that need refinement
@@ -141,15 +140,41 @@ class Mesh:
 
         # first pass, identify leaf
         # nodes that need refinement
-        for leaf in leafs:
+        for leaf in leaves.copy():
             if leaf.shall_refine(criterium):
                 to_refine.append(leaf)
             else:
-                parent: Node = leaf.parent
-                if parent.shall_coarsen():
-                    to_coarsen.append(leaf.parent)
+                # update the list of leaves
+                # to exclude those that are
+                # marked for refinement
+                leaves.remove(leaf)
 
-        # record the current leaf level
+        # second pass, collect all parents
+        # that might need coarsening
+        # group siblings together
+        # by their parent
+        parent_children: dict[Node, list[Node]] = {}
+        for leaf in leaves:
+            parent: Optional[Node] = leaf.parent
+            if parent:
+                if parent not in parent_children:
+                    parent_children[parent] = []
+                parent_children[parent].append(leaf)
+
+        # check which parents
+        # can be coarsened
+        for parent, children in parent_children.items():
+            # only consider parents where
+            # all children are leaves and
+            # not marked for refinement
+            if len(children) == (8 if parent._is_tri_dimensional else 4) and all(
+                child.is_leaf() for child in children
+            ):
+                # Check if coarsening is allowed based on neighbor levels
+                if parent.shall_coarsen():
+                    to_coarsen.append(parent)
+
+        # update the current leaf level
         # relative to the initialized
         # mesh tree structure
         if to_refine:
@@ -160,8 +185,8 @@ class Mesh:
             node.refine(criterium)
 
         # coarsen the identified nodes
-        # for node in to_coarsen:
-        #     node.coarsen()
+        for node in to_coarsen:
+            node.coarsen()
 
     def inject(self, f: Callable[[Node], None]) -> None:
         """

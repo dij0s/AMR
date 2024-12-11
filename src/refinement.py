@@ -81,6 +81,7 @@ class GradientRefinementCriterium(RefinementCriterium):
         max_gradient: float = max(
             abs(node.value - neighbor.value) for neighbor in valid_neighbors
         )
+
         # compute relative gradient
         # node's value is handled to
         # avoid division by zero

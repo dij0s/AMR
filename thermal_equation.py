@@ -23,7 +23,7 @@ DY: float = LY / N  # spatial step in x [m]
 
 # temporal
 T: float = 10.0  # total simulation time [s]
-DT: float = 0.01  # time step [s]
+DT: float = 0.005  # time step [s]
 N_STEPS: int = int(T / DT)  # number of time steps
 simulation_time: float = 0.0  # current simulation time
 
@@ -93,7 +93,7 @@ for step in range(1, N_STEPS):
         )
 
         # apply refinement criterium
-        mesh.refine(criterium, max_depth=2)
+        mesh.refine(criterium, max_depth=3)
 
         # save mesh state
         mesh.save(f"mesh_t{step:04}.vtk")

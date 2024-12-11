@@ -234,10 +234,15 @@ class Node:
             case Direction.DOWN:
                 neighbor_y = 0
 
-        neighbor_node = parent_neighbor._children.get((neighbor_x, neighbor_y, None))
+        neighbor_node: Optional[Node] = parent_neighbor._children.get(
+            (neighbor_x, neighbor_y, None)
+        )
 
-        # If the neighbor node has children and is at a lower level than current node,
-        # traverse down to find the appropriate child
+        # if the neighbor node has
+        # children and is at a lower
+        # level than current node,
+        # traverse down to find the
+        # appropriate child
         while (
             neighbor_node
             and neighbor_node.level < self.level
