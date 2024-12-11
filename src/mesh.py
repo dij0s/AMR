@@ -131,26 +131,37 @@ class Mesh:
             if self._current_leaf_level >= max_depth:
                 return
 
+        leafs: list[Node] = list(self.leafs())
+
         # keep track of nodes
         # that need refinement
+        # or coarsening
         to_refine: list[Node] = []
+        to_coarsen: list[Node] = []
 
         # first pass, identify leaf
         # nodes that need refinement
-        for leaf in self.leafs():
+        for leaf in leafs:
             if leaf.shall_refine(criterium):
                 to_refine.append(leaf)
+            else:
+                parent: Node = leaf.parent
+                if parent.shall_coarsen():
+                    to_coarsen.append(leaf.parent)
 
-        # second pass, refine
-        # the identified nodes
+        # record the current leaf level
+        # relative to the initialized
+        # mesh tree structure
+        if to_refine:
+            self._current_leaf_level += 1
+
+        # refine the identified nodes
         for node in to_refine:
             node.refine(criterium)
 
-        # record the current leaf level
-        self._current_leaf_level += 1
-
-        # check coarsening
-        # of parent nodes
+        # coarsen the identified nodes
+        for node in to_coarsen:
+            node.coarsen()
 
     def inject(self, f: Callable[[Node], None]) -> None:
         """

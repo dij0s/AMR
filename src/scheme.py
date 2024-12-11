@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from src.node import Direction
 
@@ -65,25 +65,28 @@ class SecondOrderCenteredFiniteDifferences(NumericalScheme):
 
         # iterate over nodes
         for node, node_copy in zip(nodes, nodes_copy):
-            # check if node is on border
+            # get neighbor nodes
+            right: Optional["Node"] = node_copy.neighbor(Direction.RIGHT)
+            left: Optional["Node"] = node_copy.neighbor(Direction.LEFT)
+            up: Optional["Node"] = node_copy.neighbor(Direction.UP)
+            down: Optional["Node"] = node_copy.neighbor(Direction.DOWN)
+
+            # check if node is on boundary
             # if so, skip the node
-            if node.is_on_border(self._LX, self._LY, None, self._DX, self._DY, None):
+            # MAYBE TREAT BOUNDARY NODES DIFFERENTLY
+            if not all([right, left, up, down]):
                 continue
 
             # compute the Laplacian term
             # in direction d1
             laplacian_term: float = (
-                node_copy.neighbor(Direction.RIGHT).value
-                - (2 * node_copy.value)
-                + node_copy.neighbor(Direction.LEFT).value
+                right.value - (2 * node_copy.value) + left.value
             ) / self._d1**2
 
             # add the Laplacian term
             # in direction d2
             laplacian_term += (
-                node_copy.neighbor(Direction.UP).value
-                - (2 * node_copy.value)
-                + node_copy.neighbor(Direction.DOWN).value
+                up.value - (2 * node_copy.value) + down.value
             ) / self._d2**2
 
             # multiply the Laplacian term

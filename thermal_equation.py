@@ -15,7 +15,7 @@ from src.scheme import SecondOrderCenteredFiniteDifferences
 # of the model
 
 # spatial
-N: int = 64  # number of cells per dimension
+N: int = 128  # number of cells per dimension
 LX: float = 10.0  # length of the domain in x [m]
 LY: float = 10.0  # length of the domain in y [m]
 DX: float = LX / N  # spatial step in x [m]
@@ -72,14 +72,13 @@ solver = SecondOrderCenteredFiniteDifferences(
 
 # create refinement criterium
 # based on the gradient change
-criterium = GradientRefinementCriterium(threshold=0.5)
+criterium = GradientRefinementCriterium(threshold=0.2)
 
 # benchmark the time
 start = time.time()
 
 # iterate over time
 for step in range(1, N_STEPS):
-    # for step in range(1, 151):
     # simulation time increases
     simulation_time += DT
 

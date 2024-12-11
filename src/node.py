@@ -36,7 +36,6 @@ class Node:
         "_children",
         "_absolute_origin",
         "_is_tri_dimensional",
-        "_is_on_border",
     )
 
     def __init__(
@@ -70,9 +69,6 @@ class Node:
         # compute the absolute origin of the node
         self._absolute_origin: Point = self._compute_absolute_origin()
 
-        # check if the node is on the border
-        self._is_on_border: Optional[bool] = None
-
     def __repr__(self) -> str:
         """
         Method to represent the node as a string.
@@ -90,47 +86,6 @@ class Node:
                 bool: True if the node is a leaf, False otherwise.
         """
         return not self._children
-
-    def is_on_border(
-        self,
-        lx: float,
-        ly: float,
-        lz: Optional[float],
-        dx: float,
-        dy: float,
-        dz: Optional[float],
-    ) -> bool:
-        """
-        Method to evaluate if the node is on the border.
-        Memoization is used to store the result.
-
-            Parameters:
-                lx (float): The length of the domain in the x-axis.
-                ly (float): The length of the domain in the y-axis.
-                lz (Optional[float]): The length of the domain in the z-axis.
-                dx (float): The discretization step in the x-axis.
-                dy (float): The discretization step in the y-axis.
-                dz (Optional[float]): The discretization step in the z-axis.
-
-            Returns:
-                bool: True if the node is on the border, False otherwise.
-        """
-        if self._is_on_border:
-            return self._is_on_border
-        else:
-            x, y, z = self._absolute_origin
-            x = x * lx
-            y = y * ly
-            z = z * lz if z is not None else None
-
-            self._is_on_border = (
-                x == 0.0
-                or x == lx - dx
-                or y == 0.0
-                or y == ly - dy
-                or (z is not None and (z == 0.0 or z == lz - dz))
-            )
-            return self._is_on_border
 
     def shall_refine(self, criterium: "RefinementCriterium") -> bool:
         """
@@ -168,6 +123,33 @@ class Node:
         # the condition herebefore is met
         # as soon as one neighbor is more
         # than one level coarser
+
+        return True
+
+    def shall_coarsen(self) -> bool:
+        """
+        Method to evaluate if the node shall be coarsened.
+
+            Parameters:
+                None
+
+            Returns:
+                bool: True if the node shall be coarsened, False otherwise.
+        """
+        # get neighbors
+        neighbors = [
+            self.neighbor(Direction.RIGHT),
+            self.neighbor(Direction.LEFT),
+            self.neighbor(Direction.UP),
+            self.neighbor(Direction.DOWN),
+        ]
+
+        # only coarsen if no neighbor
+        # would end up more than one
+        # level different
+        for neighbor in neighbors:
+            if neighbor and abs(neighbor.level - (self.level - 1)) > 1:
+                return False
 
         return True
 
@@ -369,7 +351,8 @@ class Node:
                 None
         """
 
-        # coarsening is only possible if the node has children
+        # coarsening is only possible
+        # if the node has children
         if not self._children:
             return
 
@@ -381,6 +364,7 @@ class Node:
 
         # remove children
         self._children.clear()
+        self._children = {}
 
     def inject(self, f: Callable[["Node"], None]) -> None:
         """

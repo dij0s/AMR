@@ -53,13 +53,6 @@ def test_defined_mesh_creation(two_dimensional_mesh):
     # all the leaf nodes is 1
     assert all(n.value == 1 for n in mesh.leafs())
 
-    # check that there are
-    # exactly 12 border nodes
-    assert (
-        len([n for n in mesh.leafs() if n.is_on_border(LX, LY, None, DX, DY, None)])
-        == 12
-    )
-
 
 def test_two_dimensional_mesh_refinement(
     two_dimensional_mesh, custom_refinement_criterium
