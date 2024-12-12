@@ -15,7 +15,7 @@ from src.scheme import SecondOrderCenteredFiniteDifferences
 # of the model
 
 # adaptive mesh refinement
-MAX_RELATIVE_DEPTH: int = 3  # maximum depth of the tree (relative to the base cell)
+MAX_RELATIVE_DEPTH: int = 2  # maximum depth of the tree (relative to the base cell)
 
 # spatial
 N: int = 128  # number of cells per dimension
@@ -27,8 +27,7 @@ DY: float = LY / (N / 2**MAX_RELATIVE_DEPTH)  # spatial step in y (smallest cell
 # temporal
 T: float = 10.0  # total simulation time [s]
 DT: float = 0.01  # time step [s]
-# N_STEPS: int = int(T / DT)  # number of time steps
-N_STEPS: int = 101  # number of time steps
+N_STEPS: int = int(T / DT)  # number of time steps
 simulation_time: float = 0.0  # current simulation time
 
 # material
@@ -84,7 +83,7 @@ solver = SecondOrderCenteredFiniteDifferences(
 
 # create refinement criterium
 # based on the gradient change
-criterium = GradientRefinementCriterium(threshold=0.2)
+criterium = GradientRefinementCriterium(threshold=0.5)
 
 # benchmark the time
 start = time.time()
@@ -99,8 +98,7 @@ for step in range(1, N_STEPS):
 
     # refine and save mesh
     # every 50 steps
-    # if step % 50 == 0:
-    if True:
+    if step % 50 == 0:
         print(
             f"Step {step} / {N_STEPS}, current simulation time: {simulation_time:.3}s"
         )
