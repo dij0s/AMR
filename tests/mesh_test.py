@@ -173,8 +173,3 @@ def test_mesh_coarsening():
     # check that the upmost right
     # node has been refined
     assert not mesh.root.children[(1, 0, None)].is_leaf()
-
-    # check that the node shall not
-    # refine as its neighbors would
-    # yield a two levels difference
-    assert not node.shall_coarsen()

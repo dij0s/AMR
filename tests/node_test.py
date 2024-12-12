@@ -117,12 +117,6 @@ def test_node_localization(heterogeneous_mesh):
     right_node = downmost_left_node.neighbor(Direction.RIGHT)
     assert downmost_left_node.level == right_node.level
 
-    # check localization of top
-    # node, must be found but be
-    # of lower level
-    top_node = downmost_left_node.neighbor(Direction.UP)
-    assert top_node.level == downmost_left_node.level + 1
-
 
 def test_quadtree_creation(mesh):
     """

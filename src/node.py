@@ -143,7 +143,6 @@ class Node:
             self.neighbor(Direction.UP),
             self.neighbor(Direction.DOWN),
         ]
-        print(neighbors)
 
         # only coarsen if no neighbor
         # would end up more than one
@@ -195,25 +194,25 @@ class Node:
             # difference in level is
             # defined to not be greater
             # than one at any given time
-            if not adjacent_node.is_leaf():
-                child_x: float = x
-                child_y: float = y
-                # MAYBE HANDLE DIFFERENTLY
-                # TO AVOID RETURNING A SINGLE
-                # CELL BUT MAYBE A WHOLE LINE
-                match direction:
-                    case Direction.RIGHT:
-                        child_x = 0
-                    case Direction.LEFT:
-                        child_x = 1
-                    case Direction.UP:
-                        child_y = 1
-                    case Direction.DOWN:
-                        child_y = 0
+            # if not adjacent_node.is_leaf():
+            #     child_x: float = x
+            #     child_y: float = y
+            #     # MAYBE HANDLE DIFFERENTLY
+            #     # TO AVOID RETURNING A SINGLE
+            #     # CELL BUT MAYBE A WHOLE LINE
+            #     match direction:
+            #         case Direction.RIGHT:
+            #             child_x = 0
+            #         case Direction.LEFT:
+            #             child_x = 1
+            #         case Direction.UP:
+            #             child_y = 1
+            #         case Direction.DOWN:
+            #             child_y = 0
 
-                return adjacent_node._children.get((child_x, child_y, None))
-            else:
-                return adjacent_node
+            #     return adjacent_node._children.get((child_x, child_y, None))
+            # else:
+            return adjacent_node
 
         # determine which edge of
         # parent cell we're at

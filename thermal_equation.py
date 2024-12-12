@@ -25,6 +25,7 @@ DY: float = LY / N  # spatial step in x [m]
 T: float = 10.0  # total simulation time [s]
 DT: float = 0.01  # time step [s]
 N_STEPS: int = int(T / DT)  # number of time steps
+N_STEPS: int = 101  # number of time steps
 simulation_time: float = 0.0  # current simulation time
 
 # material
@@ -87,7 +88,8 @@ for step in range(1, N_STEPS):
 
     # refine and save mesh
     # every 50 steps
-    if step % 50 == 0:
+    # if step % 50 == 0:
+    if True:
         print(
             f"Step {step} / {N_STEPS}, current simulation time: {simulation_time:.3}s"
         )
