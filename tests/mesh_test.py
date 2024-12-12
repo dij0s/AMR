@@ -153,3 +153,28 @@ def test_tri_dimensional_mesh_refinement(
         assert node.children[(1, 0, 1)].absolute_origin == (0.5, 0, 0.5)
         assert node.children[(1, 1, 0)].absolute_origin == (0.5, 0.5, 0)
         assert node.children[(1, 1, 1)].absolute_origin == (0.5, 0.5, 0.5)
+
+
+def test_mesh_coarsening():
+    """
+    Coarsen a node in the 2D mesh.
+    """
+    mesh = Mesh.uniform(n=2, leaf_value=lambda: 1.0, lx=10, ly=10)
+
+    # get the upmost left node
+    node = mesh.root.children[(0, 0, None)]
+
+    # check that the node shall coarsen
+    # as its neighbors all have the same value
+    assert node.shall_coarsen()
+
+    mesh.root.children[(1, 0, None)].refine()
+
+    # check that the upmost right
+    # node has been refined
+    assert not mesh.root.children[(1, 0, None)].is_leaf()
+
+    # check that the node shall not
+    # refine as its neighbors would
+    # yield a two levels difference
+    assert not node.shall_coarsen()
