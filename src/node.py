@@ -299,19 +299,43 @@ class Node:
             center of the node which holds the value.
             """
             x, y, z = child_origin
-            center_distance = (
+            # center node value
+            x += 0.5
+            y += 0.5
+            z = z + 0.5 if z else None
+
+            # get neighboring nodes
+            neighbor_values: list = reduce(
+                lambda res, node: [*res, node.value] if node else res,
+                [
+                    self.neighbor(Direction.RIGHT),
+                    self.neighbor(Direction.LEFT),
+                    self.neighbor(Direction.UP),
+                    self.neighbor(Direction.DOWN),
+                ],
+                [],
+            )
+            # if we have neighbors,
+            # use their average
+            neighbor_weight: float = 0.2
+            neighbor_influence: float = (
+                sum(neighbor_values) / len(neighbor_values) if neighbor_values else 0.0
+            )
+
+            # combine current value and
+            # neighbor influence
+            center_distance: float = (
                 (x - 1) ** 2 + (y - 1) ** 2 + (0 if z is None else (z - 1) ** 2)
             ) ** 0.5
-            # maximum distance from center
-            # in 2D is sqrt(2) ≈ 1.414
-            # maximum distance from center
-            # in 3D is sqrt(3) ≈ 1.732
-            max_distance = 1.732 if self._is_tri_dimensional else 1.414
+            # sqrt(2) or sqrt(3)
+            max_distance: float = 1.414 if self._is_tri_dimensional else 2.828
+            distance_weight: float = 1 - (center_distance / max_distance)
+            interpolated: float = (
+                value * (1 - neighbor_weight) * distance_weight
+                + neighbor_influence * neighbor_weight
+            )
 
-            # normalize distance to [0,1]
-            # range and apply variation
-            normalized_distance = center_distance / max_distance
-            return value * (1 + (1 - normalized_distance))
+            return interpolated
 
         # refinement criterium must be
         # applied beforehand and is

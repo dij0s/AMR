@@ -5,7 +5,7 @@ from src.node import Node
 from src.refinement import GradientRefinementCriterium
 from src.scheme import SecondOrderCenteredFiniteDifferences
 
-# This script implements the
+# this script implements the
 # thermal equation and makes
 # use of an adaptive mesh
 # refinement
@@ -23,7 +23,7 @@ DY: float = LY / N  # spatial step in x [m]
 
 # temporal
 T: float = 10.0  # total simulation time [s]
-DT: float = 0.005  # time step [s]
+DT: float = 0.01  # time step [s]
 N_STEPS: int = int(T / DT)  # number of time steps
 simulation_time: float = 0.0  # current simulation time
 
