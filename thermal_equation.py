@@ -14,17 +14,20 @@ from src.scheme import SecondOrderCenteredFiniteDifferences
 # constants and parameters
 # of the model
 
+# adaptive mesh refinement
+MAX_RELATIVE_DEPTH: int = 3  # maximum depth of the tree (relative to the base cell)
+
 # spatial
 N: int = 128  # number of cells per dimension
 LX: float = 10.0  # length of the domain in x [m]
 LY: float = 10.0  # length of the domain in y [m]
-DX: float = LX / N  # spatial step in x [m]
-DY: float = LY / N  # spatial step in x [m]
+DX: float = LX / (N / 2**MAX_RELATIVE_DEPTH)  # spatial step in x (smallest cell) [m]
+DY: float = LY / (N / 2**MAX_RELATIVE_DEPTH)  # spatial step in y (smallest cell) [m]
 
 # temporal
 T: float = 10.0  # total simulation time [s]
 DT: float = 0.01  # time step [s]
-N_STEPS: int = int(T / DT)  # number of time steps
+# N_STEPS: int = int(T / DT)  # number of time steps
 N_STEPS: int = 101  # number of time steps
 simulation_time: float = 0.0  # current simulation time
 
@@ -37,9 +40,17 @@ RHO: float = 0.06  # density [kg/m^3]
 CP: float = 204.0  # specific heat capacity [J/kg/K]
 LAMBDA: float = 1.026  # thermal conductivity [W/m/K]
 
+LAPLACIAN_FACTOR: float = DT * LAMBDA / RHO / CP  # Laplacian factor
+
+# check stability condition
+if not DT < (RHO / LAMBDA * CP * DX**2) * 0.3:
+    raise ValueError("Stability condition not met! Please provide a smaller time step.")
 
 # create uniform mesh
-mesh = Mesh.uniform(n=N, lx=LX, ly=LY, leaf_value=lambda: 5.0)
+mesh, current_absolute_depth = Mesh.uniform(n=N, lx=LX, ly=LY, leaf_value=lambda: 5.0)
+# compute absolute maximal
+# depth of the tree
+max_absolute_depth: int = current_absolute_depth + MAX_RELATIVE_DEPTH
 
 
 # inject values into tree
@@ -68,7 +79,7 @@ mesh.save("mesh_t0.vtk")
 
 # create solving scheme
 solver = SecondOrderCenteredFiniteDifferences(
-    laplacian_factor=DT * LAMBDA / RHO / CP, d1=DX, d2=DY, LX=LX, LY=LY, DX=DX, DY=DY
+    laplacian_factor=LAPLACIAN_FACTOR, d1=DX, d2=DY, LX=LX, LY=LY, DX=DX, DY=DY
 )
 
 # create refinement criterium
@@ -95,7 +106,7 @@ for step in range(1, N_STEPS):
         )
 
         # apply refinement criterium
-        mesh.refine(criterium, max_depth=3)
+        mesh.refine(criterium, max_depth=max_absolute_depth)
 
         # save mesh state
         mesh.save(f"mesh_t{step:04}.vtk")

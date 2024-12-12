@@ -499,10 +499,11 @@ class Node:
         if self._parent is None:
             return self._origin
         else:
+            parent_origin: Point = self._parent.absolute_origin
             return (
-                self._origin[0] * level_scale + self._parent.absolute_origin[0],
-                self._origin[1] * level_scale + self._parent.absolute_origin[1],
-                self._origin[2] * level_scale + self._parent.absolute_origin[2]
+                self._origin[0] * level_scale + parent_origin[0],
+                self._origin[1] * level_scale + parent_origin[1],
+                self._origin[2] * level_scale + parent_origin[2]
                 if self._is_tri_dimensional
                 else None,
             )

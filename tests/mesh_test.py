@@ -31,7 +31,7 @@ def test_defined_mesh_creation(two_dimensional_mesh):
     DX: float = LX / N
     DY: float = LX / N
 
-    mesh: Mesh = Mesh.uniform(n=N, leaf_value=lambda: 4.0, lx=LX, ly=LY)
+    mesh, _ = Mesh.uniform(n=N, leaf_value=lambda: 4.0, lx=LX, ly=LY)
 
     # check that the refinement created
     # the correct number of nodes in each
@@ -159,7 +159,7 @@ def test_mesh_coarsening():
     """
     Coarsen a node in the 2D mesh.
     """
-    mesh = Mesh.uniform(n=2, leaf_value=lambda: 1.0, lx=10, ly=10)
+    mesh, _ = Mesh.uniform(n=2, leaf_value=lambda: 1.0, lx=10, ly=10)
 
     # get the upmost left node
     node = mesh.root.children[(0, 0, None)]

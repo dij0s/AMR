@@ -27,8 +27,6 @@ class Mesh:
         self._ly: int = ly
         self._lz: int = lz
 
-        self._current_leaf_level: int = 0
-
     @staticmethod
     def uniform(
         n: int,
@@ -36,7 +34,7 @@ class Mesh:
         lx: float,
         ly: float,
         lz: float = None,
-    ) -> "Mesh":
+    ) -> tuple["Mesh", int]:
         """
         Create a Mesh Tree of uniform size.
 
@@ -50,6 +48,7 @@ class Mesh:
 
             Returns:
                 Mesh: The uniform Mesh Tree.
+                int: The maximal leaf level of the Mesh Tree.
         """
         mesh: Mesh = Mesh(lx=lx, ly=ly, lz=lz)
 
@@ -64,6 +63,10 @@ class Mesh:
         # create the root node
         origin: Point = (0, 0, 0 if lz else None)
         mesh._root = Node(value=0, level=0, origin=origin)
+
+        # create copy of number of refinements
+        # to keep track of the leaf level
+        maximal_leaf_level: int = n_refinements
 
         # refine the leaf nodes
         # at each and every step
@@ -84,7 +87,7 @@ class Mesh:
 
             n_refinements -= 1
 
-        return mesh
+        return mesh, maximal_leaf_level
 
     def create_root(
         self, value: float, origin_x: int, origin_y: int, origin_z: int = None
@@ -112,6 +115,7 @@ class Mesh:
 
             Parameters:
                 criterium (RefinementCriterium): The refinement criterium.
+                max_depth (int): The maximal absolute depth of the Mesh Tree. By default, it is set to None.
 
             Returns:
                 None
@@ -119,17 +123,7 @@ class Mesh:
         if not self._root:
             raise ValueError("Mesh is empty. Cannot refine empty mesh.")
 
-        # ATTENTION,
-        # MAYBE NEED TO CHECK
-        # MAX DEPTH PER LEAF
-        # SO THAT COARSENING
-        # ALLOWS FOR FUTURE
-        # REFINEMENT !
-        # limit the refinement
-        # to a maximum level delta
-        if max_depth and self._current_leaf_level >= max_depth:
-            return
-
+        # get all leaf nodes
         leaves: list[Node] = list(self.leafs())
 
         # keep track of nodes
@@ -141,7 +135,7 @@ class Mesh:
         # first pass, identify leaf
         # nodes that need refinement
         for leaf in leaves.copy():
-            if leaf.shall_refine(criterium):
+            if leaf.shall_refine(criterium) and leaf.level < max_depth:
                 to_refine.append(leaf)
             else:
                 # update the list of leaves
@@ -173,12 +167,6 @@ class Mesh:
                 # Check if coarsening is allowed based on neighbor levels
                 if parent.shall_coarsen():
                     to_coarsen.append(parent)
-
-        # update the current leaf level
-        # relative to the initialized
-        # mesh tree structure
-        if to_refine:
-            self._current_leaf_level += 1
 
         # refine the identified nodes
         for node in to_refine:
