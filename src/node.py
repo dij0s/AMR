@@ -110,19 +110,14 @@ class Node:
             self.neighbor(Direction.DOWN),
         ]
 
-        # only allow refinement
-        # if no neighbor is more
-        # than one level coarser
+        # check if refinement would
+        # create an invalid difference
+        # as only a one level difference
+        # is allowed between neighbors
+        next_level: int = self._level + 1
         for neighbor in neighbors:
-            if neighbor and neighbor.level + 1 < self.level:
+            if neighbor and abs(neighbor.level - next_level) > 1:
                 return False
-
-        # hence, the node can be refined
-        # up to one level higher than
-        # the coarsest neighbor as
-        # the condition herebefore is met
-        # as soon as one neighbor is more
-        # than one level coarser
 
         return True
 
