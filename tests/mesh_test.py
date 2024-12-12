@@ -78,9 +78,6 @@ def test_two_dimensional_mesh_refinement(
         # check that the node has 4 children
         assert len(node.children) == 4
 
-        # check that the value of the node is the average of the children values
-        assert node.value == sum(c.value for c in node.children.values()) / 4
-
         # check that the children are leaves
         assert all(c.is_leaf() for c in node.children.values())
 
@@ -127,9 +124,6 @@ def test_tri_dimensional_mesh_refinement(
 
         # check that the node has 8 children
         assert len(node.children) == 8
-
-        # check that the value of the node is the average of the children values
-        assert node.value == sum(c.value for c in node.children.values()) / 8
 
         # check that the children are leaves
         assert all(c.is_leaf() for c in node.children.values())

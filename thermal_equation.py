@@ -15,7 +15,7 @@ from src.scheme import SecondOrderCenteredFiniteDifferences
 # of the model
 
 # spatial
-N: int = 64  # number of cells per dimension
+N: int = 128  # number of cells per dimension
 LX: float = 10.0  # length of the domain in x [m]
 LY: float = 10.0  # length of the domain in y [m]
 DX: float = LX / N  # spatial step in x [m]
