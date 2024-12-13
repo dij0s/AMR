@@ -139,11 +139,22 @@ class Node:
             self.neighbor(Direction.DOWN),
         ]
 
-        # only coarsen if no neighbor
-        # would end up more than one
-        # level different
+        # level after potential coarsening
+        next_level = self.level - 1
+
+        # print(self.parent.children[(0, 1, None)])
+        # print(f"{[n.children.values() for n in neighbors if n]}")
+
         for neighbor in neighbors:
-            if neighbor and abs(neighbor.level - (self.level - 1)) > 1:
+            if not neighbor:
+                continue
+
+            # If neighbor has children, we can't coarsen as it would create a level difference greater than 1
+            if not neighbor.is_leaf():
+                return False
+
+            # check level difference with leaf neighbors
+            if abs(neighbor.level - next_level) > 1:
                 return False
 
         return True
