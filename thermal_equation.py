@@ -9,6 +9,10 @@ from src.scheme import SecondOrderCenteredFiniteDifferences
 # thermal equation and makes
 # use of an adaptive mesh
 # refinement
+# the domain ensures energy
+# conservation as a continuous
+# heat source is injected into
+# the domain
 
 # define physics-related
 # constants and parameters
@@ -30,11 +34,13 @@ DT: float = 0.01  # time step [s]
 N_STEPS: int = int(T / DT)  # number of time steps
 simulation_time: float = 0.0  # current simulation time
 
+N_RECORDS: int = 20  # number of records to save
+record_interval: int = N_STEPS // N_RECORDS  # interval between records
+
 # material
 RHO: float = 1.204  # density [kg/m^3]
 CP: float = 1004.0  # specific heat capacity [J/kg/K]
 LAMBDA: float = 0.026  # thermal conductivity [W/m/K]
-#
 # RHO: float = 0.06  # density [kg/m^3]
 # CP: float = 204.0  # specific heat capacity [J/kg/K]
 # LAMBDA: float = 1.026  # thermal conductivity [W/m/K]
@@ -43,6 +49,7 @@ LAPLACIAN_FACTOR: float = DT * LAMBDA / RHO / CP  # Laplacian factor
 
 # check stability condition
 if not DT < (RHO / (LAMBDA * CP * DX**2)) * 0.3:
+    print(f"{DT} ≮ {((RHO / (LAMBDA * CP * DX**2)) * 0.3):.4}")
     raise ValueError("Stability condition not met! Please provide a smaller time step.")
 
 # create uniform mesh
@@ -74,7 +81,7 @@ def heat_source(node: Node) -> None:
 mesh.inject(heat_source)
 
 # save initialized mesh
-mesh.save("mesh_t0.vtk")
+mesh.save("mesh_t0000.vtk")
 
 # create solving scheme
 solver = SecondOrderCenteredFiniteDifferences(
@@ -83,7 +90,7 @@ solver = SecondOrderCenteredFiniteDifferences(
 
 # create refinement criterium
 # based on the gradient change
-criterium = GradientRefinementCriterium(threshold=0.2)
+criterium = GradientRefinementCriterium(threshold=0.1)
 
 # benchmark the time
 start = time.time()
@@ -97,8 +104,8 @@ for step in range(1, N_STEPS):
     mesh.solve(solver)
 
     # refine and save mesh
-    # every 50 steps
-    if step % 50 == 0:
+    # every n steps
+    if step % record_interval == 0:
         print(
             f"Step {step} / {N_STEPS}, current simulation time: {simulation_time:.3}s"
         )

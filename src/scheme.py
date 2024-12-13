@@ -71,22 +71,25 @@ class SecondOrderCenteredFiniteDifferences(NumericalScheme):
             up: Optional["Node"] = node_copy.neighbor(Direction.UP)
             down: Optional["Node"] = node_copy.neighbor(Direction.DOWN)
 
-            # check if node is on boundary
-            # if so, skip the node
-            # MAYBE TREAT BOUNDARY NODES DIFFERENTLY
-            if not all([right, left, up, down]):
-                continue
+            # implement a Neumann boundary
+            # condition as we specify the
+            # derivative (gradient) at the
+            # boundary to be zero
+            right_value: float = right.value if right else node_copy.value
+            left_value: float = left.value if left else node_copy.value
+            up_value: float = up.value if up else node_copy.value
+            down_value: float = down.value if down else node_copy.value
 
             # compute the Laplacian term
             # in direction d1
             laplacian_term: float = (
-                right.value - (2 * node_copy.value) + left.value
+                right_value - (2 * node_copy.value) + left_value
             ) / self._d1**2
 
             # add the Laplacian term
             # in direction d2
             laplacian_term += (
-                up.value - (2 * node_copy.value) + down.value
+                up_value - (2 * node_copy.value) + down_value
             ) / self._d2**2
 
             # multiply the Laplacian term
