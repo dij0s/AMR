@@ -137,7 +137,7 @@ class GradientRefinementCriterium(RefinementCriterium):
             return (value, 0.75)
 
         # get neighbors' values
-        # in all directions
+        # in all cardinal directions
         neighbors: list[tuple[Optional[float], float]] = reduce(
             lambda res, dd: [*res, handle_neighbor(node, dd[1], dd[0])]
             if dd[1] is not None

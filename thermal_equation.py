@@ -29,12 +29,12 @@ DX: float = LX / (N / 2**MAX_RELATIVE_DEPTH)  # spatial step in x (smallest cell
 DY: float = LY / (N / 2**MAX_RELATIVE_DEPTH)  # spatial step in y (smallest cell) [m]
 
 # temporal
-T: float = 10.0  # total simulation time [s]
+T: float = 100.0  # total simulation time [s]
 DT: float = 0.01  # time step [s]
 N_STEPS: int = int(T / DT)  # number of time steps
 simulation_time: float = 0.0  # current simulation time
 
-N_RECORDS: int = 20  # number of records to save
+N_RECORDS: int = 200  # number of records to save
 record_interval: int = N_STEPS // N_RECORDS  # interval between records
 
 # material
@@ -81,7 +81,7 @@ def heat_source(node: Node) -> None:
 mesh.inject(heat_source)
 
 # save initialized mesh
-mesh.save("mesh_t0000.vtk")
+mesh.save("mesh_t00000.vtk")
 
 # create solving scheme
 solver = SecondOrderCenteredFiniteDifferences(
@@ -90,7 +90,7 @@ solver = SecondOrderCenteredFiniteDifferences(
 
 # create refinement criterium
 # based on the gradient change
-criterium = GradientRefinementCriterium(threshold=0.1)
+criterium = GradientRefinementCriterium(threshold=0.8)
 
 # benchmark the time
 start = time.time()

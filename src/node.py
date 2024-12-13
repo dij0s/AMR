@@ -324,55 +324,82 @@ class Node:
                 None
         """
 
-        def interpolate(value: float, child_origin: Point) -> float:
+        def interpolate(parent: Node, child_origin: Point) -> float:
             """
-            Helper function to interpolate the value of the
-            children nodes using second-order interpolation.
+            Helper function to interpolate the value of a
+            child node using a simple linear interpolation
+            between the parent value and the neighbors values.
+
+                Parameters:
+                    parent (Node): The current parent node.
+                    child_origin (Point): The origin of the child node.
+
+                Returns:
+                    float: The interpolated value of the child node.
             """
-            # get cardinal neighbors
-            cardinal_neighbors_values: list[float] = [
-                n.value
-                for n in [
-                    self.neighbor(Direction.RIGHT),
-                    self.neighbor(Direction.LEFT),
-                    self.neighbor(Direction.UP),
-                    self.neighbor(Direction.DOWN),
-                ]
-                if n
-            ]
 
-            # get diagonal neighbors
-            diagonal_neighbors_values: list[float] = [
-                n.value
-                for n in [
-                    self.chain(Direction.RIGHT, Direction.UP),
-                    self.chain(Direction.RIGHT, Direction.DOWN),
-                    self.chain(Direction.LEFT, Direction.UP),
-                    self.chain(Direction.LEFT, Direction.DOWN),
-                ]
-                if n
-            ]
+            # parent value
+            value: float = parent.value
+            # parent centered
+            # coordinates
+            x: float = 0.5
+            y: float = 0.5
 
-            # weight cardinal neighbors
-            # more than diagonal neighbors
-            # for a smoother interpolation
-            # (1/sqrt(2)) for diagonals (0.707)
-            neighbor_influence: float = 0.0
-            if cardinal_neighbors_values:
-                neighbor_influence += sum(cardinal_neighbors_values)
-            if diagonal_neighbors_values:
-                neighbor_influence += sum(diagonal_neighbors_values) * 0.707
+            # get neighbors
+            right: Optional[Node] = parent.neighbor(Direction.RIGHT)
+            left: Optional[Node] = parent.neighbor(Direction.LEFT)
+            up: Optional[Node] = parent.neighbor(Direction.UP)
+            down: Optional[Node] = parent.neighbor(Direction.DOWN)
 
-            count: float = (
-                len(cardinal_neighbors_values) + len(diagonal_neighbors_values) * 0.707
-            )
-            neighbor_influence /= max(count, 1)
+            # compute gradient in the
+            # x and y directions
+            dx: float = 0.0
+            dy: float = 0.0
 
-            neighbor_weight: float = 0.2
-            # simple weighted average
-            # between parent value and
-            # neighbor influence
-            return value * (1 - neighbor_weight) + neighbor_influence * neighbor_weight
+            # compute gradient using
+            # central differences
+            if right and left:
+                dx = (right.value - left.value) / 2.0
+            # fallback to forward
+            # differences
+            elif right:
+                dx = right.value - value
+            elif left:
+                dx = value - left.value
+
+            # compute gradient using
+            # central differences
+            if up and down:
+                dy = (down.value - up.value) / 2.0
+            # fallback to forward
+            # differences
+            elif up:
+                dy = up.value - value
+            elif down:
+                dy = value - down.value
+
+            # scale gradients
+            # to prevent too
+            # agregious interpolation
+            dx *= 0.1
+            dy *= 0.1
+
+            # compute delta x and y
+            # destructure child origin
+            # and center it
+            child_x, child_y, _ = child_origin
+            child_x = (child_x * 0.5) + 0.25
+            child_y = (child_y * 0.5) + 0.25
+
+            # compute relative position
+            # from parent center
+            delta_x: float = child_x - x
+            delta_y: float = child_y - y
+
+            # compute interpolated value
+            child_value: float = value + (delta_x * dx) + (delta_y * dy)
+
+            return child_value
 
         # refinement criterium must be
         # applied beforehand and is
@@ -408,7 +435,7 @@ class Node:
             # interpolate the value
             # of the children nodes
             children_values: list[float] = [
-                interpolate(self._value, origin) for origin in origins
+                interpolate(self, origin) for origin in origins
             ]
 
             self._children = {
