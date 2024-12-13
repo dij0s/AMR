@@ -318,61 +318,36 @@ class Node:
             children nodes using second-order interpolation.
             """
             x, y, z = child_origin
+            x += 0.5
+            y += 0.5
+            z = z + 0.5 if z else None
 
-            # get neighboring nodes
-            neighbors: dict[Direction, Optional[Node]] = {
-                Direction.RIGHT: self.neighbor(Direction.RIGHT),
-                Direction.LEFT: self.neighbor(Direction.LEFT),
-                Direction.UP: self.neighbor(Direction.UP),
-                Direction.DOWN: self.neighbor(Direction.DOWN),
-            }
+            neighbor_values: list[float] = [
+                neighbor.value
+                for neighbor in [
+                    self.neighbor(Direction.RIGHT),
+                    self.neighbor(Direction.LEFT),
+                    self.neighbor(Direction.UP),
+                    self.neighbor(Direction.DOWN),
+                ]
+                if neighbor
+            ]
 
-            # compute distance from
-            # parent cell center (1, 1, _)
-            dx: float = x - 1.0
-            dy: float = y - 1.0
-
-            # compute the quadratic
-            # interpolation terms
-            dx2: float = dx * dx
-            dy2: float = dy * dy
-            dxy: float = dx * dy
-
-            # compute base interpolation
-            # using quadratic interpolation
-            base_weight: float = (1.0 - dx2) * (1.0 - dy2)
-            interpolated_value: float = base_weight * value
-
-            # add neighboring contributions
-            # with quadratic weighting
             neighbor_weight: float = 0.2
-            for direction, neighbor in neighbors.items():
-                if neighbor:
-                    match direction:
-                        case Direction.RIGHT:
-                            weight: float = (1.0 + dx) * (1.0 - dy2)
-                        case Direction.LEFT:
-                            weight: float = (1.0 - dx) * (1.0 - dy2)
-                        case Direction.UP:
-                            weight: float = (1.0 - dx2) * (1.0 + dy)
-                        case Direction.DOWN:
-                            weight: float = (1.0 - dx2) * (1.0 - dy)
-
-                    interpolated_value += neighbor_weight * weight * neighbor.value
-
-            # cross-term contribution
-            # for diagonal variations
-            cross_term: float = dxy * (1.0 - dx2) * (1.0 - dy2)
-            interpolated_value += 0.1 * cross_term * value
-
-            # normalize the interpolated
-            # value considering the weights
-            total_weight: float = (
-                1.0 + neighbor_weight * len([n for n in neighbors.values() if n]) + 0.1
+            neighbor_influence: float = (
+                sum(neighbor_values) / len(neighbor_values) if neighbor_values else 0.0
             )
-            interpolated_value /= total_weight
 
-            return interpolated_value
+            center_distance: float = (
+                (x - 1) ** 2 + (y - 1) ** 2 + (0 if z is None else (z - 1) ** 2)
+            ) ** 0.5
+            max_distance: float = 1.414 if self._is_tri_dimensional else 2.828
+            distance_weight: float = 1 - (center_distance / max_distance)
+
+            return (
+                value * (1 - neighbor_weight) * distance_weight
+                + neighbor_influence * neighbor_weight
+            )
 
         # refinement criterium must be
         # applied beforehand and is

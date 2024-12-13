@@ -18,7 +18,7 @@ from src.scheme import SecondOrderCenteredFiniteDifferences
 MAX_RELATIVE_DEPTH: int = 2  # maximum depth of the tree (relative to the base cell)
 
 # spatial
-N: int = 128  # number of cells per dimension
+N: int = 64  # number of cells per dimension
 LX: float = 10.0  # length of the domain in x [m]
 LY: float = 10.0  # length of the domain in y [m]
 DX: float = LX / (N / 2**MAX_RELATIVE_DEPTH)  # spatial step in x (smallest cell) [m]
@@ -31,18 +31,18 @@ N_STEPS: int = int(T / DT)  # number of time steps
 simulation_time: float = 0.0  # current simulation time
 
 # material
-# RHO: float = 1.204  # density [kg/m^3]
-# CP: float = 1004.0  # specific heat capacity [J/kg/K]
-# LAMBDA: float = 0.026  # thermal conductivity [W/m/K]
+RHO: float = 1.204  # density [kg/m^3]
+CP: float = 1004.0  # specific heat capacity [J/kg/K]
+LAMBDA: float = 0.026  # thermal conductivity [W/m/K]
 #
-RHO: float = 0.06  # density [kg/m^3]
-CP: float = 204.0  # specific heat capacity [J/kg/K]
-LAMBDA: float = 1.026  # thermal conductivity [W/m/K]
+# RHO: float = 0.06  # density [kg/m^3]
+# CP: float = 204.0  # specific heat capacity [J/kg/K]
+# LAMBDA: float = 1.026  # thermal conductivity [W/m/K]
 
 LAPLACIAN_FACTOR: float = DT * LAMBDA / RHO / CP  # Laplacian factor
 
 # check stability condition
-if not DT < (RHO / LAMBDA * CP * DX**2) * 0.3:
+if not DT < (RHO / (LAMBDA * CP * DX**2)) * 0.3:
     raise ValueError("Stability condition not met! Please provide a smaller time step.")
 
 # create uniform mesh
@@ -83,7 +83,7 @@ solver = SecondOrderCenteredFiniteDifferences(
 
 # create refinement criterium
 # based on the gradient change
-criterium = GradientRefinementCriterium(threshold=0.5)
+criterium = GradientRefinementCriterium(threshold=0.2)
 
 # benchmark the time
 start = time.time()

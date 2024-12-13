@@ -91,7 +91,7 @@ class SecondOrderCenteredFiniteDifferences(NumericalScheme):
 
             # multiply the Laplacian term
             # by the Laplacian factor
-            laplacian_term *= self._laplacian_factor
+            laplacian_term = laplacian_term * self._laplacian_factor
 
             # update the value of the node
             node.value = node_copy.value + laplacian_term
