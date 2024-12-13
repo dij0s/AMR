@@ -285,6 +285,18 @@ class Node:
 
         return neighbor_node
 
+    def chain(self, *direction: Direction) -> Optional["Node"]:
+        """
+        Method to chain the neighbors of the node in a given direction.
+
+            Parameters:
+                direction (Direction): The direction(s) to evaluate the neighbor.
+
+            Returns:
+                Optional[Node]: The diagonal neighbor node.
+        """
+        return reduce(lambda res, d: res.neighbor(d) if res else None, direction, self)
+
     def adjacent(self, point: Point) -> Optional["Node"]:
         """
         Method to get the adjacent neighbor (same level) of the node at a given point.
@@ -317,37 +329,50 @@ class Node:
             Helper function to interpolate the value of the
             children nodes using second-order interpolation.
             """
-            x, y, z = child_origin
-            x += 0.5
-            y += 0.5
-            z = z + 0.5 if z else None
-
-            neighbor_values: list[float] = [
-                neighbor.value
-                for neighbor in [
+            # get cardinal neighbors
+            cardinal_neighbors_values: list[float] = [
+                n.value
+                for n in [
                     self.neighbor(Direction.RIGHT),
                     self.neighbor(Direction.LEFT),
                     self.neighbor(Direction.UP),
                     self.neighbor(Direction.DOWN),
                 ]
-                if neighbor
+                if n
             ]
 
+            # get diagonal neighbors
+            diagonal_neighbors_values: list[float] = [
+                n.value
+                for n in [
+                    self.chain(Direction.RIGHT, Direction.UP),
+                    self.chain(Direction.RIGHT, Direction.DOWN),
+                    self.chain(Direction.LEFT, Direction.UP),
+                    self.chain(Direction.LEFT, Direction.DOWN),
+                ]
+                if n
+            ]
+
+            # weight cardinal neighbors
+            # more than diagonal neighbors
+            # for a smoother interpolation
+            # (1/sqrt(2)) for diagonals (0.707)
+            neighbor_influence: float = 0.0
+            if cardinal_neighbors_values:
+                neighbor_influence += sum(cardinal_neighbors_values)
+            if diagonal_neighbors_values:
+                neighbor_influence += sum(diagonal_neighbors_values) * 0.707
+
+            count: float = (
+                len(cardinal_neighbors_values) + len(diagonal_neighbors_values) * 0.707
+            )
+            neighbor_influence /= max(count, 1)
+
             neighbor_weight: float = 0.2
-            neighbor_influence: float = (
-                sum(neighbor_values) / len(neighbor_values) if neighbor_values else 0.0
-            )
-
-            center_distance: float = (
-                (x - 1) ** 2 + (y - 1) ** 2 + (0 if z is None else (z - 1) ** 2)
-            ) ** 0.5
-            max_distance: float = 1.414 if self._is_tri_dimensional else 2.828
-            distance_weight: float = 1 - (center_distance / max_distance)
-
-            return (
-                value * (1 - neighbor_weight) * distance_weight
-                + neighbor_influence * neighbor_weight
-            )
+            # simple weighted average
+            # between parent value and
+            # neighbor influence
+            return value * (1 - neighbor_weight) + neighbor_influence * neighbor_weight
 
         # refinement criterium must be
         # applied beforehand and is
@@ -382,7 +407,6 @@ class Node:
         else:
             # interpolate the value
             # of the children nodes
-            # (linearly)
             children_values: list[float] = [
                 interpolate(self._value, origin) for origin in origins
             ]

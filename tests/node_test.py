@@ -118,6 +118,39 @@ def test_node_localization(heterogeneous_mesh):
     assert downmost_left_node.level == right_node.level
 
 
+def test_node_chain_localization(heterogeneous_mesh):
+    """
+    Test the localization of a node in the mesh
+    by chaining the directions
+    """
+    # get topmost left node
+    topmost_left = heterogeneous_mesh.root.children[(0, 0, None)].children[(0, 0, None)]
+    assert topmost_left is not None
+
+    # get the node on the
+    # bottom right
+    # it should be of same
+    # level as current node
+    bottom_right = topmost_left.chain(Direction.DOWN, Direction.RIGHT)
+    assert bottom_right is not None
+    assert topmost_left.level == bottom_right.level
+
+    # get the node on the
+    # absolute bottom right
+    # it should be of lower
+    # level than current node
+    # as it is coarser
+    absolute_bottom_right = bottom_right.chain(Direction.DOWN, Direction.RIGHT)
+    assert absolute_bottom_right is not None
+    assert bottom_right.level == absolute_bottom_right.level + 1
+
+    # there shall be no node
+    # when chaining to the bottom
+    # right from the absolute
+    # bottom right node
+    assert absolute_bottom_right.chain(Direction.DOWN, Direction.RIGHT) is None
+
+
 def test_quadtree_creation(mesh):
     """
     Test the creation of a quadtree root node

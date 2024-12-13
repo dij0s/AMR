@@ -164,7 +164,8 @@ class Mesh:
             if len(children) == (8 if parent._is_tri_dimensional else 4) and all(
                 child.is_leaf() for child in children
             ):
-                # Check if coarsening is allowed based on neighbor levels
+                # check if coarsening is allowed
+                # based on neighbor levels
                 if parent.shall_coarsen():
                     to_coarsen.append(parent)
 
