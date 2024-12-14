@@ -77,7 +77,7 @@ class Mesh:
 
             # refine current nodes
             for node in to_refine:
-                node.refine(number_generator=leaf_value, fixed_level=0)
+                node.refine(number_generator=leaf_value)
                 new_to_refine.extend(node.children.values())
 
             # update the members to

@@ -39,8 +39,8 @@ def test_defined_mesh_creation(two_dimensional_mesh):
     assert len(list(mesh.leafs())) == 16
 
     # check that all the nodes are
-    # at the same level (level 0)
-    assert all(n.level == 0 for n in mesh.leafs())
+    # at the same level (level 2)
+    assert all(n.level == 2 for n in mesh.leafs())
 
     # inject 1 into the mesh if
     # the node is a leaf and else 0

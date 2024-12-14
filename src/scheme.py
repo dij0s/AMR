@@ -96,5 +96,7 @@ class SecondOrderCenteredFiniteDifferences(NumericalScheme):
             # by the Laplacian factor
             laplacian_term = laplacian_term * self._laplacian_factor
 
+            # print(laplacian_term) if laplacian_term > 0 else None
+
             # update the value of the node
             node.value = node_copy.value + laplacian_term
