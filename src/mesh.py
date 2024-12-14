@@ -152,18 +152,7 @@ class Mesh:
             if criterium.eval(leaf) and leaf.level < max_depth:
                 # refine valid leaf
                 # nodes in buffer zone
-                current_z: float = leaf.origin[2]
-                # buffer_nodes: list[Node] = [
-                #     leaf.adjacent(origin)
-                #     for origin in [
-                #         (0, 0, current_z),
-                #         (0, 1, current_z),
-                #         (1, 0, current_z),
-                #         (1, 1, current_z),
-                #     ]
-                #     if origin != leaf.origin
-                # ]
-                buffer_nodes: list[Node] = [node for node in leaf.buffer(3) if node]
+                buffer_nodes: list[Node] = [node for node in leaf.buffer(4) if node]
 
                 # refine buffer nodes
                 # that satisfy the

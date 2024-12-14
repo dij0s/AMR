@@ -19,8 +19,8 @@ from src.scheme import SecondOrderCenteredFiniteDifferences
 # of the model
 
 # adaptive mesh refinement
-MIN_RELATIVE_DEPTH: int = -3  # minimum depth of the tree (relative to the base cell)
-MAX_RELATIVE_DEPTH: int = 1  # maximum depth of the tree (relative to the base cell)
+MIN_RELATIVE_DEPTH: int = -4  # minimum depth of the tree (relative to the base cell)
+MAX_RELATIVE_DEPTH: int = 2  # maximum depth of the tree (relative to the base cell)
 
 # spatial
 N: int = 64  # number of cells per dimension
