@@ -493,17 +493,23 @@ class Node:
 
         # create children nodes
         # check for a number generator
+        # and for fixed level
         with_generator: bool = False
         number_generator: Optional[Callable([[float], None])] = None
-        if kwargs.get("number_generator"):
+        fixed_level: Optional[int] = None
+
+        if kwargs.get("number_generator") is not None:
             with_generator = True
             number_generator = kwargs.get("number_generator")
+
+        if kwargs.get("fixed_level") is not None:
+            fixed_level = kwargs.get("fixed_level")
 
         if with_generator:
             self._children = {
                 origin: Node(
                     value=number_generator(),
-                    level=self._level + 1,
+                    level=self._level + 1 if fixed_level is None else fixed_level,
                     origin=origin,
                     parent=self,
                 )
@@ -519,7 +525,7 @@ class Node:
             self._children = {
                 origin: Node(
                     value=child_value,
-                    level=self._level + 1,
+                    level=self._level + 1 if fixed_level is None else fixed_level,
                     origin=origin,
                     parent=self,
                 )

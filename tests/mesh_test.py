@@ -38,9 +38,9 @@ def test_defined_mesh_creation(two_dimensional_mesh):
     # direction (2d mesh of 4x4 nodes)
     assert len(list(mesh.leafs())) == 16
 
-    # check that the mesh is
-    # split into 3 levels (0 is base)
-    assert all(n.level == 2 for n in mesh.leafs())
+    # check that all the nodes are
+    # at the same level (level 0)
+    assert all(n.level == 0 for n in mesh.leafs())
 
     # inject 1 into the mesh if
     # the node is a leaf and else 0
