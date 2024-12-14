@@ -178,6 +178,9 @@ class GradientRefinementCriterium(RefinementCriterium):
         gradient_magnitude: float = (dx_gradient**2 + dy_gradient**2) ** 0.5
 
         # compute relative gradient
-        relative_gradient: float = gradient_magnitude / max(node.value, 1e-6)
+        relative_gradient: float = (
+            gradient_magnitude / node.value if node.value != 0.0 else 0.0
+        )
+        node.gradient = relative_gradient
 
         return relative_gradient > self._threshold

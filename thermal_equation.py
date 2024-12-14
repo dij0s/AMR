@@ -19,6 +19,7 @@ from src.scheme import SecondOrderCenteredFiniteDifferences
 # of the model
 
 # adaptive mesh refinement
+MIN_RELATIVE_DEPTH: int = -1  # minimum depth of the tree (relative to the base cell)
 MAX_RELATIVE_DEPTH: int = 2  # maximum depth of the tree (relative to the base cell)
 
 # spatial
@@ -29,33 +30,35 @@ DX: float = LX / (N / 2**MAX_RELATIVE_DEPTH)  # spatial step in x (smallest cell
 DY: float = LY / (N / 2**MAX_RELATIVE_DEPTH)  # spatial step in y (smallest cell) [m]
 
 # temporal
-T: float = 10.0  # total simulation time [s]
+T: float = 100.0  # total simulation time [s]
 DT: float = 0.01  # time step [s]
 N_STEPS: int = int(T / DT)  # number of time steps
 simulation_time: float = 0.0  # current simulation time
 
-N_RECORDS: int = 20  # number of records to save
+N_RECORDS: int = 200  # number of records to save
 record_interval: int = N_STEPS // N_RECORDS  # interval between records
 
 # material
-# RHO: float = 1.204  # density [kg/m^3]
-# CP: float = 1004.0  # specific heat capacity [J/kg/K]
-# LAMBDA: float = 0.026  # thermal conductivity [W/m/K]
-RHO: float = 0.06  # density [kg/m^3]
-CP: float = 204.0  # specific heat capacity [J/kg/K]
-LAMBDA: float = 1.026  # thermal conductivity [W/m/K]
+RHO: float = 1.204  # density [kg/m^3]
+CP: float = 1004.0  # specific heat capacity [J/kg/K]
+LAMBDA: float = 0.026  # £ thermal conductivity [W/m/K]
+# RHO: float = 0.06  # density [kg/m^3]
+# CP: float = 204.0  # specific heat capacity [J/kg/K]
+# LAMBDA: float = 1.026  # thermal conductivity [W/m/K]
 
 LAPLACIAN_FACTOR: float = DT * LAMBDA / RHO / CP  # Laplacian factor
 
 # check stability condition
-# if not DT < (RHO / (LAMBDA * CP * DX**2)) * 0.3:
-#     print(f"{DT} ≮ {((RHO / (LAMBDA * CP * DX**2)) * 0.3):.4}")
-#     raise ValueError("Stability condition not met! Please provide a smaller time step.")
+if not DT < (RHO / (LAMBDA * CP * DX**2)) * 0.3:
+    print(f"{DT} ≮ {((RHO / (LAMBDA * CP * DX**2)) * 0.3):.4}")
+    raise ValueError("Stability condition not met! Please provide a smaller time step.")
 
 # create uniform mesh
 mesh, current_absolute_depth = Mesh.uniform(n=N, lx=LX, ly=LY, leaf_value=lambda: 5.0)
-# compute absolute maximal
-# depth of the tree
+# compute absolute minimal
+# and maximal depth of
+# the tree
+min_absolute_depth: int = current_absolute_depth + MIN_RELATIVE_DEPTH
 max_absolute_depth: int = current_absolute_depth + MAX_RELATIVE_DEPTH
 
 
@@ -90,7 +93,7 @@ solver = SecondOrderCenteredFiniteDifferences(
 
 # create refinement criterium
 # based on the gradient change
-criterium = GradientRefinementCriterium(threshold=0.8)
+criterium = GradientRefinementCriterium(threshold=0.3)
 
 # benchmark the time
 start = time.time()
@@ -111,7 +114,9 @@ for step in range(1, N_STEPS):
         )
 
         # apply refinement criterium
-        mesh.refine(criterium, max_depth=max_absolute_depth)
+        mesh.refine(
+            criterium, min_depth=min_absolute_depth, max_depth=max_absolute_depth
+        )
 
         # save mesh state
         mesh.save(f"mesh_t{step:04}.vtk")

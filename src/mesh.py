@@ -109,12 +109,18 @@ class Mesh:
 
         return self._root
 
-    def refine(self, criterium: RefinementCriterium, max_depth: int = None) -> None:
+    def refine(
+        self,
+        criterium: RefinementCriterium,
+        min_depth: int = None,
+        max_depth: int = None,
+    ) -> None:
         """
         Refine the Mesh Tree based on a refinement criterium.
 
             Parameters:
                 criterium (RefinementCriterium): The refinement criterium.
+                min_depth (int): The minimal absolute depth of the Mesh Tree. By default, it is set to None.
                 max_depth (int): The maximal absolute depth of the Mesh Tree. By default, it is set to None.
 
             Returns:
@@ -126,21 +132,21 @@ class Mesh:
         # get all leaf nodes
         leaves: list[Node] = list(self.leafs())
 
-        # keep track of nodes
-        # that need refinement
-        # or coarsening
-        to_refine: list[Node] = []
-        to_coarsen: list[Node] = []
-
         # first pass, identify leaf
         # nodes that need refinement
-        for leaf in leaves.copy():
+        # and refine them
+        to_refine: list[Node] = []
+        for leaf in leaves:
             if leaf.shall_refine(criterium) and leaf.level < max_depth:
                 to_refine.append(leaf)
-                # update the list of leaves
-                # to exclude those that are
-                # marked for refinement
-                leaves.remove(leaf)
+
+        # refine them
+        for node in to_refine:
+            node.refine()
+
+        # get updated leaf nodes
+        # after the first pass
+        leaves = list(self.leafs())
 
         # second pass, collect all parents
         # that might need coarsening
@@ -149,26 +155,28 @@ class Mesh:
         parent_children: dict[Node, list[Node]] = {}
         for leaf in leaves:
             parent: Optional[Node] = leaf.parent
-            if parent:
+            # exclude parent of leaf
+            # nodes that were refine
+            # in the first pass
+            if parent not in to_refine:
                 if parent not in parent_children:
                     parent_children[parent] = []
                 parent_children[parent].append(leaf)
 
         # check which parents
         # can be coarsened
+        to_coarsen: list[Node] = []
         for parent, children in parent_children.items():
             # only consider parents where
             # all children are leaves and
             # not marked for refinement
-            if all(child.is_leaf() for child in children):
+            if all(child.is_leaf() for child in children) and len(children) == (
+                8 if parent._is_tri_dimensional else 4
+            ):
                 # check if coarsening is allowed
                 # based on neighbor levels
-                if parent.shall_coarsen():
+                if parent.shall_coarsen() and parent.level >= min_depth:
                     to_coarsen.append(parent)
-
-        # refine the identified nodes
-        for node in to_refine:
-            node.refine(criterium)
 
         # coarsen the identified nodes
         for node in to_coarsen:
@@ -361,12 +369,18 @@ class Mesh:
             for _ in range(len(cells)):
                 f.write(f"{cell_type}\n")
 
-            # write cell data (values)
+            # write cell data (values and gradients)
             f.write(f"\nCELL_DATA {len(cells)}\n")
+
             f.write("SCALARS value float 1\n")
             f.write("LOOKUP_TABLE default\n")
             for leaf in leaves:
                 f.write(f"{leaf.value}\n")
+
+            f.write("SCALARS gradient float 1\n")
+            f.write("LOOKUP_TABLE default\n")
+            for leaf in leaves:
+                f.write(f"{leaf.gradient}\n")
 
             print("VTK file written successfully.")
 

@@ -36,6 +36,7 @@ class Node:
         "_children",
         "_absolute_origin",
         "_is_tri_dimensional",
+        "gradient",
     )
 
     def __init__(
@@ -68,6 +69,8 @@ class Node:
 
         # compute the absolute origin of the node
         self._absolute_origin: Point = self._compute_absolute_origin()
+
+        self.gradient: float = 0.0
 
     def __repr__(self) -> str:
         """
@@ -131,30 +134,80 @@ class Node:
             Returns:
                 bool: True if the node shall be coarsened, False otherwise.
         """
-        # get neighbors
-        neighbors = [
-            self.neighbor(Direction.RIGHT),
-            self.neighbor(Direction.LEFT),
-            self.neighbor(Direction.UP),
-            self.neighbor(Direction.DOWN),
-        ]
 
-        # level after potential coarsening
-        next_level = self.level - 1
+        def finest_neighbor_level(direction: Direction) -> Optional[int]:
+            """
+            Helper function to get the finest neighbor level in a given direction.
+            Traverses the neighbors to find the finest level while considering the
+            mirrored direction.
 
-        # print(self.parent.children[(0, 1, None)])
-        # print(f"{[n.children.values() for n in neighbors if n]}")
+                Parameters:
+                    direction (Direction): The direction to evaluate the neighbor.
+
+                Returns:
+                    Optional[int]: The finest neighbor level in the given direction.
+            """
+            neighbor: Optional[Node] = self.neighbor(direction)
+            if not neighbor:
+                return None
+
+            # if neighbor is leaf
+            # return its level
+            if neighbor.is_leaf():
+                return neighbor.level
+
+            # if neighbor has children
+            # return the finest level
+            # of its children in mirrored
+            # direction (opposite edge)
+            match direction:
+                case Direction.RIGHT:
+                    closest_children: list[Node] = [
+                        neighbor.children[(0, 0, None)],
+                        neighbor.children[(0, 1, None)],
+                    ]
+                case Direction.LEFT:
+                    closest_children: list[Node] = [
+                        neighbor.children[(1, 0, None)],
+                        neighbor.children[(1, 1, None)],
+                    ]
+                case Direction.UP:
+                    closest_children: list[Node] = [
+                        neighbor.children[(0, 1, None)],
+                        neighbor.children[(1, 1, None)],
+                    ]
+                case Direction.DOWN:
+                    closest_children: list[Node] = [
+                        neighbor.children[(0, 0, None)],
+                        neighbor.children[(1, 0, None)],
+                    ]
+
+            # if any of the children
+            # is not a leaf, return
+            # its level + 1 as it
+            # would yield the coarsening
+            # conditions to be False
+            if not all(child.is_leaf() for child in closest_children):
+                return closest_children[0].level + 1
+
+            # all the children
+            # in neighbor are
+            # of same level
+            return closest_children[0].level
+
+        # get neighboring
+        # cells levels
+        neighbors: list[Optional[int]] = map(
+            finest_neighbor_level,
+            [Direction.RIGHT, Direction.LEFT, Direction.UP, Direction.DOWN],
+        )
 
         for neighbor in neighbors:
             if not neighbor:
                 continue
-
-            # If neighbor has children, we can't coarsen as it would create a level difference greater than 1
-            if not neighbor.is_leaf():
-                return False
-
-            # check level difference with leaf neighbors
-            if abs(neighbor.level - next_level) > 1:
+            # check level difference
+            # with neighboring level
+            if abs(neighbor - self.level) > 1:
                 return False
 
         return True
