@@ -19,7 +19,7 @@ from src.scheme import SecondOrderCenteredFiniteDifferences
 # of the model
 
 # adaptive mesh refinement
-MIN_RELATIVE_DEPTH: int = -4  # minimum depth of the tree (relative to the base cell)
+MIN_RELATIVE_DEPTH: int = -5  # minimum depth of the tree (relative to the base cell)
 MAX_RELATIVE_DEPTH: int = 2  # maximum depth of the tree (relative to the base cell)
 
 # spatial
@@ -95,7 +95,7 @@ solver = SecondOrderCenteredFiniteDifferences(
 
 # create refinement criterium
 # based on the gradient change
-criterium = GradientRefinementCriterium(threshold=0.3)
+criterium = GradientRefinementCriterium(threshold=0.1)
 
 # benchmark the time
 start = time.time()
@@ -104,6 +104,10 @@ start = time.time()
 for step in range(1, N_STEPS):
     # simulation time increases
     simulation_time += DT
+
+    # continuous energy injection
+    # into the domain
+    mesh.inject(heat_source)
 
     # solve the thermal equation
     mesh.solve(solver)
@@ -123,9 +127,6 @@ for step in range(1, N_STEPS):
         # save mesh state
         mesh.save(f"mesh_t{step:04}.vtk")
 
-    # continuous energy injection
-    # into the domain
-    mesh.inject(heat_source)
 
 # benchmark the time
 elapsed = time.time() - start
