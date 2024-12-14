@@ -153,16 +153,17 @@ class Mesh:
                 # refine valid leaf
                 # nodes in buffer zone
                 current_z: float = leaf.origin[2]
-                buffer_nodes: list[Node] = [
-                    leaf.adjacent(origin)
-                    for origin in [
-                        (0, 0, current_z),
-                        (0, 1, current_z),
-                        (1, 0, current_z),
-                        (1, 1, current_z),
-                    ]
-                    if origin != leaf.origin
-                ]
+                # buffer_nodes: list[Node] = [
+                #     leaf.adjacent(origin)
+                #     for origin in [
+                #         (0, 0, current_z),
+                #         (0, 1, current_z),
+                #         (1, 0, current_z),
+                #         (1, 1, current_z),
+                #     ]
+                #     if origin != leaf.origin
+                # ]
+                buffer_nodes: list[Node] = [node for node in leaf.buffer(3) if node]
 
                 # refine buffer nodes
                 # that satisfy the
@@ -178,7 +179,8 @@ class Mesh:
 
                 # add current node
                 # to refinement set
-                to_refine.add(leaf)
+                if leaf.shall_refine(criterium):
+                    to_refine.add(leaf)
 
         # refine the identified nodes
         for node in to_refine:
@@ -219,8 +221,8 @@ class Mesh:
                     to_coarsen.append(parent)
 
         # coarsen the identified nodes
-        # for node in to_coarsen:
-        #     node.coarsen()
+        for node in to_coarsen:
+            node.coarsen()
 
     def inject(self, f: Callable[[Node], None]) -> None:
         """

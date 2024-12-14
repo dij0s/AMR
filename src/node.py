@@ -247,30 +247,6 @@ class Node:
         # neighbor in current parent
         adjacent_node: Optional[Node] = self._parent._children.get(adjacent_origin)
         if adjacent_node:
-            # must check if adjacent
-            # node has children
-            # only check once as the
-            # difference in level is
-            # defined to not be greater
-            # than one at any given time
-            # if not adjacent_node.is_leaf():
-            #     child_x: float = x
-            #     child_y: float = y
-            #     # MAYBE HANDLE DIFFERENTLY
-            #     # TO AVOID RETURNING A SINGLE
-            #     # CELL BUT MAYBE A WHOLE LINE
-            #     match direction:
-            #         case Direction.RIGHT:
-            #             child_x = 0
-            #         case Direction.LEFT:
-            #             child_x = 1
-            #         case Direction.UP:
-            #             child_y = 1
-            #         case Direction.DOWN:
-            #             child_y = 0
-
-            #     return adjacent_node._children.get((child_x, child_y, None))
-            # else:
             return adjacent_node
 
         # determine which edge of
@@ -361,22 +337,42 @@ class Node:
         """
         return reduce(lambda res, d: res.neighbor(d) if res else None, direction, self)
 
-    # def buffer(self, n: int) -> list[Optional["Node"]]:
-    #     """
-    #     Method to buffer the neighbors of the node up to a given distance.
+    def buffer(self, n: int) -> list[Optional["Node"]]:
+        """
+        Method to buffer the neighbors of the node up to a given distance.
 
-    #         Parameters:
-    #             n (int): The distance (in number of cells) to buffer the neighbors.
+            Parameters:
+                n (int): The distance (in number of cells) to buffer the neighbors.
 
-    #         Returns:
-    #             list[Optional[Node]]: The buffered neighbors of the node.
-    #     """
+            Returns:
+                list[Optional[Node]]: The buffered neighbors of the node.
+        """
 
-    #     buffered_neighbors: list[Optional[Node]] = [self]
+        buffered_neighbors: list[Optional[Node]] = [self]
 
-    #     # add cardinal neighbors
-    #     # in given distance
-    #     buffered_neighbors.extend([])
+        # add cardinal neighbors
+        # in given distance range
+        for direction in [
+            Direction.RIGHT,
+            Direction.LEFT,
+            Direction.UP,
+            Direction.DOWN,
+        ]:
+            for i in range(1, n + 1):
+                buffered_neighbors.append(self.chain(*[direction] * i))
+
+        # add diagonal neighbors
+        # in given distance range
+        for direction in [
+            (Direction.RIGHT, Direction.UP),
+            (Direction.RIGHT, Direction.DOWN),
+            (Direction.LEFT, Direction.UP),
+            (Direction.LEFT, Direction.DOWN),
+        ]:
+            for i in range(1, n):
+                buffered_neighbors.append(self.chain(direction * i))
+
+        return buffered_neighbors
 
     def adjacent(self, point: Point) -> Optional["Node"]:
         """
