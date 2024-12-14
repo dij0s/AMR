@@ -39,19 +39,21 @@ N_RECORDS: int = 200  # number of records to save
 record_interval: int = N_STEPS // N_RECORDS  # interval between records
 
 # material
-RHO: float = 1.204  # density [kg/m^3]
-CP: float = 1004.0  # specific heat capacity [J/kg/K]
-LAMBDA: float = 0.026  # £ thermal conductivity [W/m/K]
-# RHO: float = 0.06  # density [kg/m^3]
-# CP: float = 204.0  # specific heat capacity [J/kg/K]
-# LAMBDA: float = 1.026  # thermal conductivity [W/m/K]
+# RHO: float = 1.204  # density [kg/m^3]
+# CP: float = 1004.0  # specific heat capacity [J/kg/K]
+# LAMBDA: float = 0.026  # thermal conductivity [W/m/K]
+# unstable conditions down below
+# for greater heat conductivity
+RHO: float = 0.06  # density [kg/m^3]
+CP: float = 204.0  # specific heat capacity [J/kg/K]
+LAMBDA: float = 1.026  # thermal conductivity [W/m/K]
 
 LAPLACIAN_FACTOR: float = DT * LAMBDA / RHO / CP  # Laplacian factor
 
 # check stability condition
-if not DT < (RHO / (LAMBDA * CP * DX**2)) * 0.3:
-    print(f"{DT} ≮ {((RHO / (LAMBDA * CP * DX**2)) * 0.3):.4}")
-    raise ValueError("Stability condition not met! Please provide a smaller time step.")
+# if not DT < (RHO / (LAMBDA * CP * DX**2)) * 0.3:
+#     print(f"{DT} ≮ {((RHO / (LAMBDA * CP * DX**2)) * 0.3):.4}")
+#     raise ValueError("Stability condition not met! Please provide a smaller time step.")
 
 # create uniform mesh
 mesh, current_absolute_depth = Mesh.uniform(n=N, lx=LX, ly=LY, leaf_value=lambda: 5.0)

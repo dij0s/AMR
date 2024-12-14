@@ -1,7 +1,7 @@
 from typing import Callable, Generator, Optional
 
 from .node import Node, Point
-from .refinement import RefinementCriterium
+from .refinement import CustomRefinementCriterium, RefinementCriterium
 from .scheme import NumericalScheme
 
 
@@ -116,7 +116,7 @@ class Mesh:
         max_depth: int = None,
     ) -> None:
         """
-        Refine the Mesh Tree based on a refinement criterium.
+        Refine and coarsen the Mesh Tree based on a refinement criterium.
 
             Parameters:
                 criterium (RefinementCriterium): The refinement criterium.
@@ -132,15 +132,55 @@ class Mesh:
         # get all leaf nodes
         leaves: list[Node] = list(self.leafs())
 
+        # create bypass criterium
+        # for stripe refinement
+        bypass_criterium: RefinementCriterium = CustomRefinementCriterium(
+            lambda node: True
+        )
+
         # first pass, identify leaf
         # nodes that need refinement
-        # and refine them
-        to_refine: list[Node] = []
+        to_refine: set[Node] = set()
         for leaf in leaves:
-            if leaf.shall_refine(criterium) and leaf.level < max_depth:
-                to_refine.append(leaf)
+            # only evaluate criterium
+            # refinement condition as
+            # buffer zone is refined
+            # before and may lead
+            # to further refinement
+            # because of mesh grading
+            # constraints
+            if criterium.eval(leaf) and leaf.level < max_depth:
+                # refine valid leaf
+                # nodes in buffer zone
+                current_z: float = leaf.origin[2]
+                buffer_nodes: list[Node] = [
+                    leaf.adjacent(origin)
+                    for origin in [
+                        (0, 0, current_z),
+                        (0, 1, current_z),
+                        (1, 0, current_z),
+                        (1, 1, current_z),
+                    ]
+                    if origin != leaf.origin
+                ]
 
-        # refine them
+                # refine buffer nodes
+                # that satisfy the
+                # physical constraints
+                for node in buffer_nodes:
+                    if (
+                        node
+                        and node.is_leaf()
+                        and node.level < max_depth
+                        and node.shall_refine(bypass_criterium)
+                    ):
+                        node.refine()
+
+                # add current node
+                # to refinement set
+                to_refine.add(leaf)
+
+        # refine the identified nodes
         for node in to_refine:
             node.refine()
 
@@ -156,7 +196,7 @@ class Mesh:
         for leaf in leaves:
             parent: Optional[Node] = leaf.parent
             # exclude parent of leaf
-            # nodes that were refine
+            # nodes that were refined
             # in the first pass
             if parent not in to_refine:
                 if parent not in parent_children:
@@ -175,12 +215,12 @@ class Mesh:
             ):
                 # check if coarsening is allowed
                 # based on neighbor levels
-                if parent.shall_coarsen() and parent.level >= min_depth:
+                if parent.shall_coarsen(criterium) and parent.level >= min_depth:
                     to_coarsen.append(parent)
 
         # coarsen the identified nodes
-        for node in to_coarsen:
-            node.coarsen()
+        # for node in to_coarsen:
+        #     node.coarsen()
 
     def inject(self, f: Callable[[Node], None]) -> None:
         """

@@ -155,7 +155,7 @@ def test_tri_dimensional_mesh_refinement(
         assert node.children[(1, 1, 1)].absolute_origin == (0.5, 0.5, 0.5)
 
 
-def test_mesh_coarsening():
+def test_mesh_coarsening(custom_refinement_criterium):
     """
     Coarsen a node in the 2D mesh.
     """
@@ -166,7 +166,7 @@ def test_mesh_coarsening():
 
     # check that the node shall coarsen
     # as its neighbors all have the same value
-    assert node.shall_coarsen()
+    assert node.shall_coarsen(custom_refinement_criterium)
 
     mesh.root.children[(1, 0, None)].refine()
 

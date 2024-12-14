@@ -124,12 +124,12 @@ class Node:
 
         return True
 
-    def shall_coarsen(self) -> bool:
+    def shall_coarsen(self, criterium: "RefinementCriterium") -> bool:
         """
         Method to evaluate if the node shall be coarsened.
 
             Parameters:
-                None
+                criterium (RefinementCriterium): The criterium to evaluate the node.
 
             Returns:
                 bool: True if the node shall be coarsened, False otherwise.
@@ -206,11 +206,11 @@ class Node:
             if not neighbor:
                 continue
             # check level difference
-            # with neighboring level
+            # with neighbor's level
             if abs(neighbor - self.level) > 1:
                 return False
 
-        return True
+        return True and not criterium.eval(self)
 
     def neighbor(self, direction: Direction) -> Optional["Node"]:
         """
@@ -361,6 +361,23 @@ class Node:
         """
         return reduce(lambda res, d: res.neighbor(d) if res else None, direction, self)
 
+    # def buffer(self, n: int) -> list[Optional["Node"]]:
+    #     """
+    #     Method to buffer the neighbors of the node up to a given distance.
+
+    #         Parameters:
+    #             n (int): The distance (in number of cells) to buffer the neighbors.
+
+    #         Returns:
+    #             list[Optional[Node]]: The buffered neighbors of the node.
+    #     """
+
+    #     buffered_neighbors: list[Optional[Node]] = [self]
+
+    #     # add cardinal neighbors
+    #     # in given distance
+    #     buffered_neighbors.extend([])
+
     def adjacent(self, point: Point) -> Optional["Node"]:
         """
         Method to get the adjacent neighbor (same level) of the node at a given point.
@@ -382,7 +399,8 @@ class Node:
         Method to refine the node.
 
             Parameters:
-                None
+                *args: Variable length argument list.
+                **kwargs: Arbitrary keyword arguments.
 
             Returns:
                 None
