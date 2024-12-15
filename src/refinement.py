@@ -45,7 +45,7 @@ class CustomRefinementCriterium(RefinementCriterium):
 class GradientRefinementCriterium(RefinementCriterium):
     """
     A class used to define a gradient refinement criterium.
-    It implements second-order approximation.
+    It implements a first-order gradient approximation.
     """
 
     def __init__(self, threshold: float) -> None:
@@ -61,9 +61,6 @@ class GradientRefinementCriterium(RefinementCriterium):
         self._threshold: float = threshold
 
     def eval(self, node: "Node") -> bool:
-        # get neighboring nodes
-        # in all directions
-
         def handle_neighbor(
             current_node: "Node", node: "Node", direction: Direction
         ) -> tuple[Optional[float], float]:
@@ -163,16 +160,12 @@ class GradientRefinementCriterium(RefinementCriterium):
         # compute second order
         # central difference for
         # x-direction gradient
-        dx_gradient: float = (
-            (right_value - left_value) / (right_factor + left_factor) * left_factor
-        )
+        dx_gradient: float = (right_value - left_value) / (right_factor + left_factor)
 
         # compute second order
         # central difference for
         # y-direction gradient
-        dy_gradient: float = (
-            (up_value - down_value) / (up_factor + down_factor) * down_factor
-        )
+        dy_gradient: float = (up_value - down_value) / (up_factor + down_factor)
 
         # compute gradient magnitude
         gradient_magnitude: float = (dx_gradient**2 + dy_gradient**2) ** 0.5

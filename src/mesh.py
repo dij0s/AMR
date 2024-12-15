@@ -164,6 +164,11 @@ class Mesh:
 
                 # add current node
                 # to refinement set
+                # only if previous
+                # buffer refinement
+                # allows current leaf
+                # physical constraints
+                # being met
                 if leaf.shall_refine(criterium):
                     to_refine.add(leaf)
 

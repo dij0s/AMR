@@ -30,6 +30,8 @@ DX: float = LX / (N / 2**MAX_RELATIVE_DEPTH)  # spatial step in x (smallest cell
 DY: float = LY / (N / 2**MAX_RELATIVE_DEPTH)  # spatial step in y (smallest cell) [m]
 
 # temporal
+# T: float = 2.0  # total simulation time [s]
+# DT: float = 0.0002  # time step [s]
 T: float = 100.0  # total simulation time [s]
 DT: float = 0.01  # time step [s]
 N_STEPS: int = int(T / DT)  # number of time steps
@@ -39,11 +41,6 @@ N_RECORDS: int = 200  # number of records to save
 record_interval: int = N_STEPS // N_RECORDS  # interval between records
 
 # material
-# RHO: float = 1.204  # density [kg/m^3]
-# CP: float = 1004.0  # specific heat capacity [J/kg/K]
-# LAMBDA: float = 0.026  # thermal conductivity [W/m/K]
-# unstable conditions down below
-# for greater heat conductivity
 RHO: float = 0.06  # density [kg/m^3]
 CP: float = 204.0  # specific heat capacity [J/kg/K]
 LAMBDA: float = 1.026  # thermal conductivity [W/m/K]
@@ -52,7 +49,7 @@ LAPLACIAN_FACTOR: float = DT * LAMBDA / RHO / CP  # Laplacian factor
 
 # check stability condition
 # if not DT < (RHO / (LAMBDA * CP * DX**2)) * 0.3:
-#     print(f"{DT} ≮ {((RHO / (LAMBDA * CP * DX**2)) * 0.3):.4}")
+#     print(f"DT: {DT}s ≮ {((RHO / (LAMBDA * CP * DX**2)) * 0.3):.4}s")
 #     raise ValueError("Stability condition not met! Please provide a smaller time step.")
 
 # create uniform mesh
@@ -101,7 +98,8 @@ criterium = GradientRefinementCriterium(threshold=0.1)
 start = time.time()
 
 # iterate over time
-for step in range(1, N_STEPS):
+# for step in range(1, N_STEPS):
+for step in range(1, 200):
     # simulation time increases
     simulation_time += DT
 
@@ -114,12 +112,14 @@ for step in range(1, N_STEPS):
 
     # refine and save mesh
     # every n steps
-    if step % record_interval == 0:
+    # if step % record_interval == 0:
+    if True:
         print(
             f"Step {step} / {N_STEPS}, current simulation time: {simulation_time:.3}s"
         )
 
-        # apply refinement criterium
+        # refine mesh based
+        # on constraints
         mesh.refine(
             criterium, min_depth=min_absolute_depth, max_depth=max_absolute_depth
         )
