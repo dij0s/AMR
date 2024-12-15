@@ -90,7 +90,7 @@ mesh.save("mesh_t00000.vtk")
 
 # create solving scheme
 solver = SecondOrderCenteredFiniteDifferences(
-    laplacian_factor=LAPLACIAN_FACTOR, d1=DX, d2=DY, LX=LX, LY=LY, DX=DX, DY=DY
+    laplacian_factor=LAPLACIAN_FACTOR, d1=DX, d2=DY
 )
 
 # create refinement criterium
@@ -125,7 +125,7 @@ for step in range(1, N_STEPS):
         )
 
         # save mesh state
-        mesh.save(f"mesh_t{step:04}.vtk")
+        mesh.save(f"mesh_t{step:05}.vtk")
 
 
 # benchmark the time

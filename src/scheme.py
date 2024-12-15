@@ -31,10 +31,6 @@ class SecondOrderCenteredFiniteDifferences(NumericalScheme):
         laplacian_factor: float,
         d1: float,
         d2: float,
-        LX: float,
-        LY: float,
-        DX: float,
-        DY: float,
     ) -> None:
         """
         Constructor for the SecondOrderCenteredFiniteDifferences class.
@@ -43,10 +39,6 @@ class SecondOrderCenteredFiniteDifferences(NumericalScheme):
                 laplacian_factor (float): The factor of the Laplacian term.
                 d1 (float): The first derivative factor.
                 d2 (float): The second derivative factor.
-                LX (float): The length of the domain in the x direction.
-                LY (float): The length of the domain in the y direction.
-                DX (float): The distance between nodes in the x direction.
-                DY (float): The distance between nodes in the y direction.
 
             Returns:
                 None
@@ -54,10 +46,6 @@ class SecondOrderCenteredFiniteDifferences(NumericalScheme):
         self._laplacian_factor: float = laplacian_factor
         self._d1: float = d1
         self._d2: float = d2
-        self._LX: float = LX
-        self._LY: float = LY
-        self._DX: float = DX
-        self._DY: float = DY
 
     def apply(self, nodes: list["Node"]) -> None:
         # create copy of nodes

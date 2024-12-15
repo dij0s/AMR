@@ -24,6 +24,40 @@ def heterogeneous_mesh() -> Mesh:
     return mesh
 
 
+def test_quadtree_creation(mesh):
+    """
+    Test the creation of a quadtree root node
+    """
+    node = mesh.create_root(value=2.0, origin_x=0, origin_y=1)
+
+    assert node.origin == (0, 1, None)
+    assert node.level == 0
+    assert node.value == 2.0
+
+    assert node.parent is None
+    assert node.children == {}
+    assert node.is_leaf()
+
+    assert node.absolute_origin == (0, 1, None)
+
+
+def test_octree_creation(mesh):
+    """
+    Test the creation of an octree root node
+    """
+    node = mesh.create_root(value=2.0, origin_x=1, origin_y=1, origin_z=2)
+
+    assert node.origin == (1, 1, 2)
+    assert node.level == 0
+    assert node.value == 2.0
+
+    assert node.parent is None
+    assert node.children == {}
+    assert node.is_leaf()
+
+    assert node.absolute_origin == (1, 1, 2)
+
+
 def test_node_localization(heterogeneous_mesh):
     """
     Test the localization of a node in the mesh
@@ -151,35 +185,53 @@ def test_node_chain_localization(heterogeneous_mesh):
     assert absolute_bottom_right.chain(Direction.DOWN, Direction.RIGHT) is None
 
 
-def test_quadtree_creation(mesh):
+def test_node_buffer_zone():
     """
-    Test the creation of a quadtree root node
+    Test the retrieval of a buffer zone
+    around a given Node in a Mesh.
     """
-    node = mesh.create_root(value=2.0, origin_x=0, origin_y=1)
 
-    assert node.origin == (0, 1, None)
-    assert node.level == 0
-    assert node.value == 2.0
+    # create mesh of size 8x8
+    # which implies three levels
+    # of refinement
+    mesh, absolute_leaf_level = Mesh.uniform(
+        n=8, leaf_value=lambda: 2.0, lx=10.0, ly=10.0
+    )
 
-    assert node.parent is None
-    assert node.children == {}
-    assert node.is_leaf()
+    # get one of the central
+    # nodes at the finest level
+    node = (
+        mesh.root.children[(0, 0, None)].children[(1, 1, None)].children[(1, 1, None)]
+    )
+    assert node is not None
+    assert node.level == absolute_leaf_level
 
-    assert node.absolute_origin == (0, 1, None)
+    # get a buffer zone
+    # around the node
+    buffer_zone = node.buffer(n=3)
+    # a buffer zone of size 3
+    # yields a square of size 7x7
+    # which contains 48 nodes
+    # when not considering the
+    # current node
+    assert len(buffer_zone) == 48
 
+    # get one of the corner-most
+    # nodes at the finest level
+    node = (
+        mesh.root.children[(0, 0, None)].children[(0, 0, None)].children[(0, 0, None)]
+    )
+    assert node is not None
+    assert node.level == absolute_leaf_level
 
-def test_octree_creation(mesh):
-    """
-    Test the creation of an octree root node
-    """
-    node = mesh.create_root(value=2.0, origin_x=1, origin_y=1, origin_z=2)
-
-    assert node.origin == (1, 1, 2)
-    assert node.level == 0
-    assert node.value == 2.0
-
-    assert node.parent is None
-    assert node.children == {}
-    assert node.is_leaf()
-
-    assert node.absolute_origin == (1, 1, 2)
+    # get a buffer zone
+    # around the node
+    buffer_zone = node.buffer(n=3)
+    # a buffer zone of size 3
+    # based on the corner-most
+    # mesh yields a single square
+    # of size 4x4 as other nodes
+    # are not present and contains
+    # 15 nodes when not considering
+    # the current node
+    assert len(buffer_zone) == 15

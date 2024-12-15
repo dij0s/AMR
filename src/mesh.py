@@ -30,7 +30,7 @@ class Mesh:
     @staticmethod
     def uniform(
         n: int,
-        leaf_value: Callable[[float], None],
+        leaf_value: Callable[[], float],
         lx: float,
         ly: float,
         lz: float = None,
@@ -150,14 +150,10 @@ class Mesh:
             # because of mesh grading
             # constraints
             if criterium.eval(leaf) and leaf.level < max_depth:
-                # refine valid leaf
-                # nodes in buffer zone
-                buffer_nodes: list[Node] = [node for node in leaf.buffer(4) if node]
-
                 # refine buffer nodes
                 # that satisfy the
                 # physical constraints
-                for node in buffer_nodes:
+                for node in leaf.buffer(2):
                     if (
                         node
                         and node.is_leaf()

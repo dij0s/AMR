@@ -337,7 +337,7 @@ class Node:
         """
         return reduce(lambda res, d: res.neighbor(d) if res else None, direction, self)
 
-    def buffer(self, n: int) -> list[Optional["Node"]]:
+    def buffer(self, n: int) -> list["Node"]:
         """
         Method to buffer the neighbors of the node up to a given distance.
 
@@ -345,10 +345,60 @@ class Node:
                 n (int): The distance (in number of cells) to buffer the neighbors.
 
             Returns:
-                list[Optional[Node]]: The buffered neighbors of the node.
+                list[Node]: The buffered neighbors of the node.
         """
 
-        buffered_neighbors: list[Optional[Node]] = [self]
+        def helper(
+            node: "Node",
+            nn: int,
+            directions: list[Direction],
+            neighbors: list[Optional["Node"]],
+        ) -> list[Optional["Node"]]:
+            """
+            Helper function to recursively buffer the neighbors of the node up to a given distance.
+
+                Parameters:
+                    node (Node): The node to evaluate the neighbors.
+                    nn (int): The current distance (in number of cells) to buffer the neighbors.
+                    directions (list[Direction]): The directions to evaluate the neighbors.
+                    neighbors (list[Optional[Node]]): The buffered neighbors of the node.
+
+                Returns:
+                    list[Optional[Node]]: The buffered neighbors of the node.
+            """
+
+            # stop recursion
+            # if node is None
+            if not node:
+                return neighbors
+
+            buffered_neighbors: list[Optional["Node"]] = []
+
+            # add itself to the buffer
+            buffered_neighbors.append(node)
+
+            # stop recursion if distance
+            # to buffer is 0
+            if nn == 0:
+                return neighbors + buffered_neighbors
+
+            # add neighbors in argument
+            # given cardinal directions
+            # for the current distance
+            for direction in directions:
+                for i in range(1, nn + 1):
+                    buffered_neighbors.append(node.chain(*[direction] * i))
+
+            # recurse in the diagonal
+            # direction
+            return helper(
+                node.chain(*directions),
+                nn - 1,
+                directions,
+                neighbors + buffered_neighbors,
+            )
+
+        cardinal_neighbors: list[Optional[Node]] = []
 
         # add cardinal neighbors
         # in given distance range
@@ -359,20 +409,31 @@ class Node:
             Direction.DOWN,
         ]:
             for i in range(1, n + 1):
-                buffered_neighbors.append(self.chain(*[direction] * i))
+                cardinal_neighbors.append(self.chain(*[direction] * i))
 
-        # add diagonal neighbors
-        # in given distance range
-        for direction in [
-            (Direction.RIGHT, Direction.UP),
-            (Direction.RIGHT, Direction.DOWN),
-            (Direction.LEFT, Direction.UP),
-            (Direction.LEFT, Direction.DOWN),
-        ]:
-            for i in range(1, n):
-                buffered_neighbors.append(self.chain(direction * i))
+        # filter out None values
+        # in cardinal directions
+        cardinal_neighbors = [node for node in cardinal_neighbors if node]
 
-        return buffered_neighbors
+        # add square corners
+        # recursively and reduce
+        # them into a single list
+        buffered_neighbors: list[Optional[Node]] = reduce(
+            lambda res, directions: helper(
+                self.chain(*directions), n - 1, directions, res
+            ),
+            [
+                [Direction.RIGHT, Direction.UP],
+                [Direction.LEFT, Direction.UP],
+                [Direction.RIGHT, Direction.DOWN],
+                [Direction.LEFT, Direction.DOWN],
+            ],
+            [],
+        )
+
+        # return the buffered neighbors
+        # in cardinal and diagonal directions
+        return cardinal_neighbors + buffered_neighbors
 
     def adjacent(self, point: Point) -> Optional["Node"]:
         """
