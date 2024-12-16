@@ -57,7 +57,7 @@ def simulation():
     N_STEPS: int = int(T / DT)  # number of time steps
     simulation_time: float = 0.0  # current simulation time
 
-    N_RECORDS: int = 20  # number of records to save
+    N_RECORDS: int = 200  # number of records to save
     record_interval: int = N_STEPS // N_RECORDS  # interval between records
 
     # material

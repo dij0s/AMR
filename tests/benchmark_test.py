@@ -57,7 +57,7 @@ def test_benchmark():
     def test_func():
         print("test")
 
-    test_func(n=2)
+    test_func(n=1)
 
     # test space decorator
     # test function with arguments

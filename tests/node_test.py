@@ -58,6 +58,131 @@ def test_octree_creation(mesh):
     assert node.absolute_origin == (1, 1, 2)
 
 
+def test_node_refinement(mesh):
+    """
+    Test the refinement of a node with and without
+    a custom number generator
+    """
+    # create root node
+    node = mesh.create_root(value=2.0, origin_x=0, origin_y=0)
+
+    # test basic refinement
+    # with interpolation
+    node.refine()
+    assert len(node.children) == 4  # for 2D mesh
+    assert not node.is_leaf()
+
+    # test refinement with
+    # custom number generator
+    node2 = mesh.create_root(value=2.0, origin_x=1, origin_y=1)
+    node2.refine(number_generator=lambda: 1.0)
+    assert all(child.value == 1.0 for child in node2.children.values())
+
+
+def test_node_coarsening(heterogeneous_mesh):
+    """
+    Test the coarsening of a node and verify
+    the resulting values and structure
+    """
+    # get a refined node
+    refined_node = heterogeneous_mesh.root.children[(0, 0, None)]
+    initial_value = refined_node.value
+
+    # coarsen the node
+    refined_node.coarsen()
+    assert refined_node.is_leaf()
+    assert len(refined_node.children) == 0
+    # value should be preserved
+    assert refined_node.value == initial_value
+
+
+def test_node_copy(mesh):
+    """
+    Test the copying of a leaf node and verify
+    that copying non-leaf nodes raises an error
+    """
+    # create and copy
+    # a leaf node
+    leaf_node = mesh.create_root(value=2.0, origin_x=0, origin_y=0)
+    copied_node = leaf_node.copy()
+
+    assert copied_node.value == leaf_node.value
+    assert copied_node.level == leaf_node.level
+    assert copied_node.origin == leaf_node.origin
+
+    # refine the node
+    # and try to copy it
+    leaf_node.refine()
+    try:
+        leaf_node.copy()
+        assert False, "should raise ValueError"
+    except ValueError:
+        assert True
+
+
+def test_node_injection(mesh):
+    """
+    Test the injection of a function throughout
+    the node hierarchy
+    """
+    # create a node and
+    # refine it
+    node = mesh.create_root(value=2.0, origin_x=0, origin_y=0)
+    node.refine()
+
+    # inject a function
+    # that doubles the value
+    def double_value(n):
+        n.value = n.value * 2
+
+    node.inject(double_value)
+
+    # check if values were modified
+    assert node.value == 4.0
+    assert all(child.value == 4.0 for child in node.children.values())
+
+
+def test_node_absolute_origin(heterogeneous_mesh):
+    """
+    Test the computation of absolute origins
+    for nodes at different levels
+    """
+    # get nodes at different levels
+    root = heterogeneous_mesh.root
+    level1_node = root.children[(0, 0, None)]
+    level2_node = level1_node.children[(0, 0, None)]
+
+    # check absolute origins
+    assert root.absolute_origin == (0, 0, None)
+    assert level1_node.absolute_origin == (0, 0, None)
+    # level 2 node should have
+    # scaled coordinates
+    assert level2_node.absolute_origin == (0, 0, None)
+
+
+def test_shall_refine_coarsen(heterogeneous_mesh):
+    """
+    Test the refinement and coarsening conditions
+    considering neighbor levels
+    """
+    from src.refinement import CustomRefinementCriterium
+
+    # create a simple criterium
+    criterium = CustomRefinementCriterium(lambda node: node.value > 1.0)
+
+    # test refinement condition
+    node = heterogeneous_mesh.root.children[(0, 0, None)]
+    can_refine = node.shall_refine(criterium)
+
+    # test coarsening condition
+    node = heterogeneous_mesh.root.children[(0, 0, None)]
+    can_coarsen = node.shall_coarsen(criterium)
+
+    # both conditions shouldn't
+    # be true simultaneously
+    assert not (can_refine and can_coarsen)
+
+
 def test_node_localization(heterogeneous_mesh):
     """
     Test the localization of a node in the mesh
