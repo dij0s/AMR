@@ -1,5 +1,4 @@
-import time
-
+from src.benchmark import Benchmark
 from src.mesh import Mesh
 from src.node import Node
 from src.refinement import GradientRefinementCriterium
@@ -94,12 +93,11 @@ solver = SecondOrderCenteredFiniteDifferences(
 # based on the gradient change
 criterium = GradientRefinementCriterium(threshold=0.1)
 
-# benchmark the time
-start = time.time()
+# benchmark the simulation
+benchmark = Benchmark()
 
 # iterate over time
-# for step in range(1, N_STEPS):
-for step in range(1, 200):
+for step in range(1, N_STEPS):
     # simulation time increases
     simulation_time += DT
 
@@ -112,8 +110,7 @@ for step in range(1, 200):
 
     # refine and save mesh
     # every n steps
-    # if step % record_interval == 0:
-    if True:
+    if step % record_interval == 0:
         print(
             f"Step {step} / {N_STEPS}, current simulation time: {simulation_time:.3}s"
         )
@@ -128,6 +125,8 @@ for step in range(1, 200):
         mesh.save(f"mesh_t{step:05}.vtk")
 
 
-# benchmark the time
-elapsed = time.time() - start
-print(f"Elapsed time: {int(elapsed)}s")
+# get total elapsed time
+print(f"Elapsed time: {int(benchmark.elapsed)}s")
+
+# get benchmark results
+print(benchmark.func_times)

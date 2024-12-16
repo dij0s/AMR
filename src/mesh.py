@@ -1,8 +1,12 @@
 from typing import Callable, Generator, Optional
 
+from .benchmark import Benchmark
 from .node import Node, Point
 from .refinement import CustomRefinementCriterium, RefinementCriterium
 from .scheme import NumericalScheme
+
+# get the benchmark instance
+benchmark = Benchmark()
 
 
 class Mesh:
@@ -109,6 +113,7 @@ class Mesh:
 
         return self._root
 
+    @benchmark.time
     def refine(
         self,
         criterium: RefinementCriterium,
@@ -214,6 +219,7 @@ class Mesh:
         for node in to_coarsen:
             node.coarsen()
 
+    @benchmark.time
     def inject(self, f: Callable[[Node], None]) -> None:
         """
         Inject a function into the Mesh Tree. It is applied to each node of the Mesh Tree recursively.
@@ -229,6 +235,7 @@ class Mesh:
 
         self._root.inject(f)
 
+    @benchmark.time
     def solve(self, scheme: NumericalScheme) -> None:
         """
         Solve the Mesh Tree using a numerical scheme.
@@ -252,6 +259,7 @@ class Mesh:
 
         yield from self._root.leafs()
 
+    @benchmark.time
     def save(self, filename: str) -> None:
         """
         Save the Mesh Tree to a VTK file.
