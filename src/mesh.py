@@ -114,6 +114,7 @@ class Mesh:
         return self._root
 
     @benchmark.time
+    @benchmark.space
     def refine(
         self,
         criterium: RefinementCriterium,
@@ -220,6 +221,7 @@ class Mesh:
             node.coarsen()
 
     @benchmark.time
+    @benchmark.space
     def inject(self, f: Callable[[Node], None]) -> None:
         """
         Inject a function into the Mesh Tree. It is applied to each node of the Mesh Tree recursively.
@@ -236,6 +238,7 @@ class Mesh:
         self._root.inject(f)
 
     @benchmark.time
+    @benchmark.space
     def solve(self, scheme: NumericalScheme) -> None:
         """
         Solve the Mesh Tree using a numerical scheme.
@@ -260,6 +263,7 @@ class Mesh:
         yield from self._root.leafs()
 
     @benchmark.time
+    @benchmark.space
     def save(self, filename: str) -> None:
         """
         Save the Mesh Tree to a VTK file.

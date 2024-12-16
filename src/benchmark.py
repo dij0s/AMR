@@ -1,6 +1,7 @@
 import os
 import time
 from collections import defaultdict
+from functools import wraps
 from typing import Callable
 
 import psutil
@@ -108,6 +109,7 @@ class Benchmark:
         The space is saved in the _func_space dictionary.
         """
 
+        @wraps(f)
         def wrapper(*args, **kwargs):
             """
             Wrapper function to measure the space of a function.
@@ -135,18 +137,49 @@ class Benchmark:
 
         return wrapper
 
-    def reset(self):
+    def reset(self) -> None:
         """
         Reset the benchmark.
+
+            Parameters:
+                None
+
+            Returns:
+                None
         """
 
         self._func_times.clear()
         self.start = time.time()
 
+    def display(self) -> None:
+        """
+        Display the benchmark results.
+
+            Parameters:
+                None
+
+            Returns:
+                None
+        """
+
+        print("\nBenchmarked time:")
+        for key, value in self._func_times.items():
+            print(f"Function '{key}':\t{value:.4}s")
+
+        print("\nBenchmarked memory usage:")
+        for key, value in self._func_space.items():
+            print(f"Function '{key}':\t{value:.4}MB")
+
     @property
     def elapsed(self) -> float:
         """
-        Get the elapsed time [s] since the start of the benchmark.
+        Get the elapsed time since the start of the benchmark.
+
+            Parameters:
+                None
+
+            Returns:
+                float: Elapsed time [s]
         """
 
         return time.time() - self.start
@@ -154,7 +187,13 @@ class Benchmark:
     @property
     def func_times(self) -> defaultdict:
         """
-        Get the elapsed time [s] for each function.
+        Get the elapsed time for each function.
+
+            Parameters:
+                None
+
+            Returns:
+                defaultdict: Elapsed time for each function [s]
         """
 
         return self._func_times
@@ -162,7 +201,13 @@ class Benchmark:
     @property
     def func_space(self) -> defaultdict:
         """
-        Get the memory used [MB] for each function.
+        Get the memory used for each function.
+
+            Parameters:
+                None
+
+            Returns:
+                defaultdict: Memory used for each function [MB]
         """
 
         return self._func_space

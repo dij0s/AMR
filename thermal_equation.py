@@ -21,7 +21,7 @@ benchmark = Benchmark()
 # in a function to enable
 # enhanced benchmarking
 @benchmark.n
-def wrapper():
+def simulation():
     # define physics-related
     # constants and parameters
     # of the model
@@ -114,7 +114,7 @@ def wrapper():
     benchmark.reset()
 
     # iterate over time
-    for step in range(1, N_STEPS):
+    for step in range(1, N_STEPS + 1):
         # simulation time increases
         simulation_time += DT
 
@@ -144,9 +144,20 @@ def wrapper():
     # get total elapsed time
     print(f"Total elapsed time: {int(benchmark.elapsed)}s")
 
-    # get benchmark results
-    print(benchmark.func_times)
+    # display benchmark results
+    benchmark.display()
 
 
 # run the simulation
-wrapper(n=10)
+if __name__ == "__main__":
+    import sys
+
+    try:
+        # get number of iterations from
+        # command line, default to 1 if
+        # not provided
+        n = int(sys.argv[1]) if len(sys.argv) > 1 else 1
+        simulation(n=n)
+    except Exception:
+        print("Usage: python thermal_equation.py [number of iterations]")
+        sys.exit(1)
