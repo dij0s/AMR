@@ -39,3 +39,34 @@ def test_benchmark():
     # test func_times
     assert benchmark.func_times["test_func"] > 0
     assert benchmark.func_times["test_func_args"] > 0
+
+    # test space decorator
+    # test basic argument-less
+    # function
+    @benchmark.space
+    def test_func():
+        return 1
+
+    res = test_func()
+    assert res == 1
+
+    # test space decorator
+    # test function with arguments
+    # and return value
+    @benchmark.space
+    def test_func_args(a: int, b: int):
+        return a + b
+
+    res = test_func_args(1, 2)
+    assert res == 3
+
+    # test space decorator
+    # test function with many
+    # array operations
+    @benchmark.space
+    def test_func_array(n: int):
+        return [i for i in range(n)]
+
+    res = test_func_array(10000)
+
+    assert benchmark.func_space["test_func_array"] > 0
