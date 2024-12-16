@@ -163,11 +163,11 @@ class Benchmark:
                 None
         """
 
-        print("\nBenchmarked time:")
+        print("BENCHMARKED TIME")
         for key, value in self._func_times.items():
             print(f"Function '{key}':\t{value:.4}s")
 
-        print("\nBenchmarked memory usage:")
+        print("BENCHMARKED SPACE")
         for key, value in self._func_space.items():
             print(f"Function '{key}':\t{value:.4}MB")
 

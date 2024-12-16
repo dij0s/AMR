@@ -35,6 +35,7 @@ class Node:
         "_parent",
         "_children",
         "_absolute_origin",
+        "_absolute_centered_origin",
         "_is_tri_dimensional",
         "gradient",
     )
@@ -69,7 +70,11 @@ class Node:
 
         # compute the absolute origin of the node
         self._absolute_origin: Point = self._compute_absolute_origin()
+        # compute the absolute centered origin of the node
+        self._absolute_centered_origin: Point = self._compute_absolute_centered_origin()
 
+        # gradient of the node
+        # only used for debugging
         self.gradient: float = 0.0
 
     def __repr__(self) -> str:
@@ -687,6 +692,31 @@ class Node:
                 else None,
             )
 
+    def _compute_absolute_centered_origin(self) -> Point:
+        """
+        Method to get the normalized absolute centered origin of the node.
+
+            Returns:
+                Point: The normalized centered origin of the node.
+        """
+        level_scale: float = 1 / (2**self._level)
+
+        if self._parent is None:
+            return (
+                self._origin[0] + 0.5,
+                self._origin[1] + 0.5,
+                self._origin[2] + 0.5 if self._is_tri_dimensional else None,
+            )
+        else:
+            parent_origin: Point = self._parent.absolute_origin
+            return (
+                (self._origin[0] + 0.5) * level_scale + parent_origin[0],
+                (self._origin[1] + 0.5) * level_scale + parent_origin[1],
+                (self._origin[2] + 0.5) * level_scale + parent_origin[2]
+                if self._is_tri_dimensional
+                else None,
+            )
+
     def copy(self) -> "Node":
         """
         Method to copy the node.
@@ -768,3 +798,13 @@ class Node:
                 Point: The absolute origin of the node.
         """
         return self._absolute_origin
+
+    @property
+    def absolute_centered_origin(self) -> Point:
+        """
+        property for the absolute centered origin of the node.
+
+            Returns:
+                Point: The absolute centered origin of the node.
+        """
+        return self._absolute_centered_origin

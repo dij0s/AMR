@@ -277,6 +277,33 @@ def test_node_localization(heterogeneous_mesh):
     assert downmost_left_node.level == right_node.level
 
 
+def test_node_absolute_centered_origin(heterogeneous_mesh):
+    """
+    Test the computation of absolute centered origins
+    for nodes at different levels. Unlike absolute_origin,
+    centered origins account for cell centers.
+    """
+    # get nodes at different levels
+    root = heterogeneous_mesh.root
+    level1_node = root.children[(0, 0, None)]
+    level2_node = level1_node.children[(0, 0, None)]
+
+    # check absolute centered origins
+    # root node should have same
+    # centered and regular origin
+    assert root.absolute_centered_origin == (0.5, 0.5, None)
+
+    # level 1 node should have
+    # centered coordinates scaled
+    # by 1/2 and offset by parent
+    assert level1_node.absolute_centered_origin == (0.25, 0.25, None)
+
+    # level 2 node should have
+    # centered coordinates scaled
+    # by 1/4 and offset by parent
+    assert level2_node.absolute_centered_origin == (0.125, 0.125, None)
+
+
 def test_node_chain_localization(heterogeneous_mesh):
     """
     Test the localization of a node in the mesh

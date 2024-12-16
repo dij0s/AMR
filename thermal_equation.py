@@ -85,8 +85,9 @@ def simulation():
     # inject values into tree
     # to represent source of heat
     def heat_source(node: Node) -> None:
-        # get node's absolute position
-        x, y, _ = node.absolute_origin
+        # get node's absolute
+        # centered origin
+        x, y, _ = node.absolute_centered_origin
 
         # calculate distance from
         # center of domain
