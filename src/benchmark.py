@@ -50,7 +50,7 @@ class Benchmark:
             self.start: float = time.time()
             Benchmark._initialized = True
 
-    def n(self, f: Callable):
+    def repeat(self, f: Callable):
         """
         Decorator to execute a function n times.
         It shall only be used to exectue a function with no return value.
@@ -65,13 +65,14 @@ class Benchmark:
             n: int = kwargs.pop("n", 1)
 
             # execute function n times
-            for _ in range(n):
+            for i in range(n):
                 # execute function
                 f(*args, **kwargs)
 
                 # sleep for 10 seconds
                 # as a way to cool down
-                time.sleep(10)
+                if n > 1 and i < n - 1:
+                    time.sleep(10)
 
         return wrapper
 

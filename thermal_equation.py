@@ -26,7 +26,7 @@ benchmark = Benchmark()
 # wrap the simulation
 # in a function to enable
 # enhanced benchmarking
-@benchmark.n
+@benchmark.repeat
 def simulation():
     # define physics-related
     # constants and parameters
@@ -52,7 +52,7 @@ def simulation():
     # temporal
     # T: float = 2.0  # total simulation time [s]
     # DT: float = 0.0002  # time step [s]
-    T: float = 10.0  # total simulation time [s]
+    T: float = 100.0  # total simulation time [s]
     DT: float = 0.01  # time step [s]
     N_STEPS: int = int(T / DT)  # number of time steps
     simulation_time: float = 0.0  # current simulation time

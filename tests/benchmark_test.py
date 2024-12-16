@@ -50,6 +50,15 @@ def test_benchmark():
     res = test_func()
     assert res == 1
 
+    # test repeat decorator
+    # test basic argument-less
+    # function
+    @benchmark.repeat
+    def test_func():
+        print("test")
+
+    test_func(n=2)
+
     # test space decorator
     # test function with arguments
     # and return value
