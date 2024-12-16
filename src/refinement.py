@@ -168,6 +168,7 @@ class GradientRefinementCriterium(RefinementCriterium):
         dy_gradient: float = (up_value - down_value) / (up_factor + down_factor)
 
         # compute gradient magnitude
+        # using L2 norm
         gradient_magnitude: float = (dx_gradient**2 + dy_gradient**2) ** 0.5
 
         # compute relative gradient
