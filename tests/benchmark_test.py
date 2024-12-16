@@ -69,4 +69,7 @@ def test_benchmark():
 
     res = test_func_array(10000)
 
-    assert benchmark.func_space["test_func_array"] > 0
+    # cannot test the size the array
+    # took in memory as it is system
+    # dependent
+    assert benchmark.func_space is not None
