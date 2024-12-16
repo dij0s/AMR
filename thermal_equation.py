@@ -1,3 +1,5 @@
+import sys
+
 from src.benchmark import Benchmark
 from src.mesh import Mesh
 from src.node import Node
@@ -14,6 +16,10 @@ from src.scheme import SecondOrderCenteredFiniteDifferences
 # the domain
 
 # benchmark the simulation
+# to measure performance
+# individual functions
+# are decorated for benchmarking
+# inside the Mesh class
 benchmark = Benchmark()
 
 
@@ -148,15 +154,13 @@ def simulation():
     benchmark.display()
 
 
-# run the simulation
 if __name__ == "__main__":
-    import sys
-
     try:
         # get number of iterations from
         # command line, default to 1 if
         # not provided
         n = int(sys.argv[1]) if len(sys.argv) > 1 else 1
+        # run the simulation
         simulation(n=n)
     except Exception:
         print("Usage: python thermal_equation.py [number of iterations]")

@@ -1,10 +1,10 @@
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Optional
 
-from src.node import Direction
+from .node import Direction
 
 if TYPE_CHECKING:
-    from src.node import Node
+    from .node import Node
 
 
 class NumericalScheme(ABC):
