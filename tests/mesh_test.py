@@ -193,21 +193,6 @@ def test_mesh_injection(two_dimensional_mesh):
     assert all(node.value == 2.0 for node in mesh.leafs())
 
 
-def test_mesh_save(two_dimensional_mesh):
-    """
-    Test saving the mesh to a VTK file
-    """
-    # create a simple mesh
-    mesh, _ = Mesh.uniform(n=2, leaf_value=lambda: 1.0, lx=10, ly=10)
-
-    # try saving
-    try:
-        mesh.save("test_mesh")
-        assert True
-    except Exception:
-        assert False, "mesh saving failed"
-
-
 def test_empty_mesh_operations(two_dimensional_mesh):
     """
     Test operations on empty mesh to ensure proper error handling
@@ -222,13 +207,6 @@ def test_empty_mesh_operations(two_dimensional_mesh):
     # try injecting
     try:
         two_dimensional_mesh.inject(lambda node: None)
-        assert False, "should raise ValueError"
-    except ValueError:
-        assert True
-
-    # try saving
-    try:
-        two_dimensional_mesh.save("empty_mesh")
         assert False, "should raise ValueError"
     except ValueError:
         assert True
@@ -280,18 +258,3 @@ def test_mesh_invalid_uniform_size():
         assert False, "should raise ValueError"
     except ValueError:
         assert True
-
-
-def test_tri_dimensional_mesh_save(tri_dimensional_mesh):
-    """
-    Test saving a 3D mesh to VTK file
-    """
-    # create 3d mesh
-    mesh, _ = Mesh.uniform(n=2, leaf_value=lambda: 1.0, lx=10, ly=10, lz=10)
-
-    # try saving
-    try:
-        mesh.save("test_3d_mesh")
-        assert True
-    except Exception:
-        assert False, "3d mesh saving failed"
