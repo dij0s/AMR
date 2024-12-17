@@ -1,3 +1,4 @@
+from collections import deque
 from enum import Enum, auto
 from functools import reduce
 from typing import TYPE_CHECKING, Callable, Generator, Optional, TypeAlias
@@ -357,7 +358,7 @@ class Node:
             node: "Node",
             nn: int,
             directions: list[Direction],
-            neighbors: list[Optional["Node"]],
+            neighbors: deque[Optional["Node"]],
         ) -> list[Optional["Node"]]:
             """
             Helper function to recursively buffer the neighbors of the node up to a given distance.
@@ -366,7 +367,7 @@ class Node:
                     node (Node): The node to evaluate the neighbors.
                     nn (int): The current distance (in number of cells) to buffer the neighbors.
                     directions (list[Direction]): The directions to evaluate the neighbors.
-                    neighbors (list[Optional[Node]]): The buffered neighbors of the node.
+                    neighbors (deque[Optional[Node]]): The buffered neighbors of the node.
 
                 Returns:
                     list[Optional[Node]]: The buffered neighbors of the node.
@@ -377,7 +378,7 @@ class Node:
             if not node:
                 return neighbors
 
-            buffered_neighbors: list[Optional["Node"]] = []
+            buffered_neighbors: deque[Optional["Node"]] = deque()
 
             # add itself to the buffer
             buffered_neighbors.append(node)
@@ -385,14 +386,14 @@ class Node:
             # stop recursion if distance
             # to buffer is 0
             if nn == 0:
-                return neighbors + buffered_neighbors
+                return buffered_neighbors + neighbors
 
             # add neighbors in argument
             # given cardinal directions
             # for the current distance
             for direction in directions:
                 for i in range(1, nn + 1):
-                    buffered_neighbors.append(node.chain(*[direction] * i))
+                    buffered_neighbors.appendleft(node.chain(*[direction] * i))
 
             # recurse in the diagonal
             # direction
@@ -433,12 +434,13 @@ class Node:
                 [Direction.RIGHT, Direction.DOWN],
                 [Direction.LEFT, Direction.DOWN],
             ],
-            [],
+            deque(),
         )
 
         # return the buffered neighbors
         # in cardinal and diagonal directions
-        return cardinal_neighbors + buffered_neighbors
+        buffered_neighbors.extend(cardinal_neighbors)
+        return buffered_neighbors
 
     def adjacent(self, point: Point) -> Optional["Node"]:
         """

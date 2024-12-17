@@ -147,6 +147,7 @@ class Mesh:
         # first pass, identify leaf
         # nodes that need refinement
         to_refine: set[Node] = set()
+        refined: set[Node] = set()
         for leaf in leaves:
             # only evaluate criterium
             # refinement condition as
@@ -159,13 +160,14 @@ class Mesh:
                 # refine buffer nodes
                 # that satisfy the
                 # physical constraints
-                for node in leaf.buffer(8):
+                for node in leaf.buffer(5):
                     if (
                         node
                         and node.is_leaf()
                         and node.level < max_depth
                         and node.shall_refine(bypass_criterium)
                     ):
+                        refined.add(node)
                         node.refine()
 
                 # add current node
@@ -196,7 +198,7 @@ class Mesh:
             # exclude parent of leaf
             # nodes that were refined
             # in the first pass
-            if parent not in to_refine:
+            if parent not in to_refine.union(refined):
                 if parent not in parent_children:
                     parent_children[parent] = []
                 parent_children[parent].append(leaf)
