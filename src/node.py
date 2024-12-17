@@ -440,7 +440,7 @@ class Node:
         # return the buffered neighbors
         # in cardinal and diagonal directions
         buffered_neighbors.extend(cardinal_neighbors)
-        return buffered_neighbors
+        return [node for node in buffered_neighbors if node]
 
     def adjacent(self, point: Point) -> Optional["Node"]:
         """

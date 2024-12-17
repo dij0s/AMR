@@ -3,7 +3,9 @@ import sys
 from src.benchmark import Benchmark
 from src.mesh import Mesh
 from src.node import Node
-from src.refinement import GradientRefinementCriterium
+from src.refinement import (
+    LogScaleGradientRefinuementCriterium,
+)
 from src.scheme import SecondOrderCenteredFiniteDifferences
 
 # this script implements the
@@ -118,7 +120,7 @@ def simulation():
 
     # create refinement criterium
     # based on the gradient change
-    criterium = GradientRefinementCriterium(threshold=0.1)
+    log_criterium = LogScaleGradientRefinuementCriterium(threshold=0.1)
 
     # reset benchmark
     # after simulation
@@ -147,7 +149,9 @@ def simulation():
             # refine mesh based
             # on constraints
             mesh.refine(
-                criterium, min_depth=min_absolute_depth, max_depth=max_absolute_depth
+                log_criterium,
+                min_depth=min_absolute_depth,
+                max_depth=max_absolute_depth,
             )
 
             # save mesh state
@@ -168,6 +172,9 @@ if __name__ == "__main__":
         n = int(sys.argv[1]) if len(sys.argv) > 1 else 1
         # run the simulation
         simulation(n=n)
-    except Exception:
+    except ValueError:
         print("Usage: python thermal_equation.py [number of iterations]")
+        sys.exit(1)
+    except Exception as e:
+        print(f"Error: {e}")
         sys.exit(1)

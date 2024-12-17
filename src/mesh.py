@@ -31,6 +31,10 @@ class Mesh:
         self._ly: int = ly
         self._lz: int = lz
 
+        # buffer zone nodes that
+        # shall not be coarsened
+        self._buffer_zone: set[Node] = set()
+
     @staticmethod
     def uniform(
         n: int,
@@ -140,6 +144,8 @@ class Mesh:
 
         # create bypass criterium
         # for stripe refinement
+        # and only physical
+        # constraints checking
         bypass_criterium: RefinementCriterium = CustomRefinementCriterium(
             lambda node: True
         )
@@ -147,7 +153,7 @@ class Mesh:
         # first pass, identify leaf
         # nodes that need refinement
         to_refine: set[Node] = set()
-        refined: set[Node] = set()
+        neighbors: set[Node] = set()
         for leaf in leaves:
             # only evaluate criterium
             # refinement condition as
@@ -156,19 +162,34 @@ class Mesh:
             # to further refinement
             # because of mesh grading
             # constraints
-            if criterium.eval(leaf) and leaf.level < max_depth:
-                # refine buffer nodes
-                # that satisfy the
-                # physical constraints
-                for node in leaf.buffer(5):
-                    if (
+            if criterium.eval(leaf):
+                for node in leaf.buffer(4):
+                    # refine buffer nodes
+                    # that satisfy the
+                    # physical constraints
+                    if leaf.level < max_depth and (
                         node
                         and node.is_leaf()
                         and node.level < max_depth
                         and node.shall_refine(bypass_criterium)
                     ):
-                        refined.add(node)
+                        # neighbors are added to
+                        # the set to avoid coarsening
+                        # them if they are in the
+                        # interest zone of the leaf
+                        neighbors.add(node)
                         node.refine()
+                    else:
+                        # if neighbor is node
+                        # refined because of
+                        # physical constraints
+                        # then make sure that
+                        # its parent does not
+                        # get coarsened as it
+                        # would lead to loss
+                        # of information near
+                        # the leaf node
+                        neighbors.add(node.parent)
 
                 # add current node
                 # to refinement set
@@ -177,7 +198,7 @@ class Mesh:
                 # allows current leaf
                 # physical constraints
                 # being met
-                if leaf.shall_refine(criterium):
+                if leaf.shall_refine(criterium) and leaf.level < max_depth:
                     to_refine.add(leaf)
 
         # refine the identified nodes
@@ -198,7 +219,8 @@ class Mesh:
             # exclude parent of leaf
             # nodes that were refined
             # in the first pass
-            if parent not in to_refine.union(refined):
+            # if parent not in to_refine.union(self._buffer_zone):
+            if parent not in to_refine.union(neighbors):
                 if parent not in parent_children:
                     parent_children[parent] = []
                 parent_children[parent].append(leaf)
