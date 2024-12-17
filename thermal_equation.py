@@ -173,7 +173,7 @@ if __name__ == "__main__":
         # run the simulation
         simulation(n=n)
     except ValueError:
-        print("Usage: python thermal_equation.py [number of iterations]")
+        print("Usage: python thermal_equation.py [number_of_iterations]")
         sys.exit(1)
     except Exception as e:
         print(f"Error: {e}")
