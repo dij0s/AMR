@@ -37,8 +37,8 @@ def test_benchmark():
     assert benchmark.elapsed > 0
 
     # test func_times
-    assert benchmark.func_times["test_func"] > 0
-    assert benchmark.func_times["test_func_args"] > 0
+    assert benchmark.func_times["test_func"][0] > 0
+    assert benchmark.func_times["test_func_args"][0] > 0
 
     # test space decorator
     # test basic argument-less

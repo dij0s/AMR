@@ -159,7 +159,7 @@ class Mesh:
                 # refine buffer nodes
                 # that satisfy the
                 # physical constraints
-                for node in leaf.buffer(2):
+                for node in leaf.buffer(8):
                     if (
                         node
                         and node.is_leaf()

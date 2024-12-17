@@ -40,9 +40,14 @@ class Benchmark:
         if not Benchmark._initialized:
             # dictionaries to store
             # the elapsed time and space
-            # for each function
-            self._func_times: defaultdict[str, float] = defaultdict(float)
-            self._func_space: defaultdict[str, float] = defaultdict(float)
+            # for each function with the
+            # number of calls
+            self._func_times: defaultdict[str, tuple[float, int]] = defaultdict(
+                lambda: (0.0, 0)
+            )
+            self._func_space: defaultdict[str, tuple[float, int]] = defaultdict(
+                lambda: (0.0, 0)
+            )
 
             # get current program process
             self._process: int = psutil.Process(os.getpid())
@@ -78,7 +83,8 @@ class Benchmark:
 
     def time(self, f: Callable):
         """
-        Decorator to measure the time of a function.
+        Decorator to measure the time of a function and
+        the number of times it is called.
         The time is saved in the _func_times dictionary.
         """
 
@@ -97,7 +103,8 @@ class Benchmark:
             elapsed: float = time.time() - start
 
             # save elapsed time
-            self._func_times[f.__name__] += elapsed
+            current_time, calls = self._func_times[f.__name__]
+            self._func_times[f.__name__] = (current_time + elapsed, calls + 1)
 
             # return result
             return result
@@ -106,7 +113,8 @@ class Benchmark:
 
     def space(self, f: Callable):
         """
-        Decorator to measure the space of a function.
+        Decorator to measure the space of a function and
+        the number of times it is called.
         The space is saved in the _func_space dictionary.
         """
 
@@ -131,7 +139,8 @@ class Benchmark:
             mem_used: float = (mem_after - mem_before) / 1024.0 / 1024.0
 
             # save memory used
-            self._func_space[f.__name__] += mem_used
+            current_memory, calls = self._func_space[f.__name__]
+            self._func_space[f.__name__] = (current_memory + mem_used, calls + 1)
 
             # return result
             return result
@@ -150,6 +159,7 @@ class Benchmark:
         """
 
         self._func_times.clear()
+        self._func_space.clear()
         self.start = time.time()
 
     def display(self) -> None:
@@ -163,13 +173,13 @@ class Benchmark:
                 None
         """
 
-        print("BENCHMARKED TIME")
+        print("BENCHMARKED TIME\nFunction name\tTotal time [s] (Number of calls)")
         for key, value in self._func_times.items():
-            print(f"Function '{key}':\t{value:.4}s")
+            print(f"{key}\t{value[0]:.4}s ({value[1]})")
 
-        print("BENCHMARKED SPACE")
+        print("BENCHMARKED SPACE\nFunction name\tMemory used [MB] (Number of calls)")
         for key, value in self._func_space.items():
-            print(f"Function '{key}':\t{value:.4}MB")
+            print(f"{key}\t{value[0]:.4}MB ({value[1]})")
 
     @property
     def elapsed(self) -> float:

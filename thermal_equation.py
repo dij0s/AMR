@@ -34,7 +34,7 @@ def simulation():
 
     # adaptive mesh refinement
     MIN_RELATIVE_DEPTH: int = (
-        -5
+        -3
     )  # minimum depth of the tree (relative to the base cell)
     MAX_RELATIVE_DEPTH: int = 2  # maximum depth of the tree (relative to the base cell)
 
@@ -61,6 +61,9 @@ def simulation():
     record_interval: int = N_STEPS // N_RECORDS  # interval between records
 
     # material
+    # RHO: float = 1.204  # density [kg/m^3]
+    # CP: float = 1004.0  # specific heat capacity [J/kg/K]
+    # LAMBDA: float = 0.026  # thermal conductivity [W/m/K]
     RHO: float = 0.06  # density [kg/m^3]
     CP: float = 204.0  # specific heat capacity [J/kg/K]
     LAMBDA: float = 1.026  # thermal conductivity [W/m/K]
@@ -70,7 +73,9 @@ def simulation():
     # check stability condition
     # if not DT < (RHO / (LAMBDA * CP * DX**2)) * 0.3:
     #     print(f"DT: {DT}s ≮ {((RHO / (LAMBDA * CP * DX**2)) * 0.3):.4}s")
-    #     raise ValueError("Stability condition not met! Please provide a smaller time step.")
+    #     raise ValueError(
+    #         "Stability condition not met! Please provide a smaller time step."
+    #     )
 
     # create uniform mesh
     mesh, current_absolute_depth = Mesh.uniform(
