@@ -25,9 +25,43 @@ def parse_lineout(filepath: str) -> list:
     # parse the data
     # ignore the header
     # and split the data
-    # to only get the
+    # to get the keys and
     # temperature values
-    return [float(line.split(" ")[1]) for line in lines[3:]]
+    return [
+        (float(line.split(" ")[0]), float(line.split(" ")[1])) for line in lines[3:]
+    ]
+
+
+def interpolate(reference_keys: list, comparison_data: list) -> list:
+    """
+    Helper function to interpolate the comparison data to the reference keys.
+
+        Parameters:
+            reference_keys (list): the reference keys
+            comparison_data (list): the comparison data
+
+        Returns:
+            list: the interpolated comparison data
+    """
+
+    # get the comparison keys
+    comparison_keys = [data[0] for data in comparison_data]
+
+    # interpolate the comparison data
+    # to the reference keys by finding
+    # the closest key
+    return [
+        (
+            key,
+            comparison_data[
+                min(
+                    range(len(comparison_keys)),
+                    key=lambda i: abs(comparison_keys[i] - key),
+                )
+            ][1],
+        )
+        for key in reference_keys
+    ]
 
 
 if __name__ == "__main__":
@@ -51,8 +85,8 @@ if __name__ == "__main__":
 
     # load all files from
     # both folders
-    reference_files = os.listdir(reference_folder)
-    comparison_files = os.listdir(comparison_folder)
+    reference_files: list = os.listdir(reference_folder)
+    comparison_files: list = os.listdir(comparison_folder)
 
     # check if they have the same
     # number of files
@@ -62,14 +96,56 @@ if __name__ == "__main__":
 
     # read and parse all files
     # into individual arrays
-    reference_data = [
+    reference_data: list = [
         parse_lineout(os.path.join(reference_folder, file)) for file in reference_files
     ]
-    comparison_data = [
-        parse_lineout(os.path.join(comparison_folder, file))
-        for file in comparison_files
+    # interpolate the comparison data
+    # to the reference data
+    comparison_data: list = [
+        interpolate(
+            [r[0] for r in reference],
+            parse_lineout(os.path.join(comparison_folder, file)),
+        )
+        for reference, file in zip(reference_data, comparison_files)
     ]
 
-    # compute the mean and
+    # compute the RMSE in [°C]
+    # of the comparison data
+    # with respect to the
+    # reference data
+    rmse: list[float] = [
+        (
+            sum([(r[1] - c[1]) ** 2 for r, c in zip(reference, comparison)])
+            / len(reference)
+        )
+        ** 0.5
+        for reference, comparison in zip(reference_data, comparison_data)
+    ]
+
+    # get the average and
     # standard deviation
-    # for each file
+    # of the RMSE
+    average_rmse: float = sum(rmse) / len(rmse)
+    std_rmse: float = (sum([(r - average_rmse) ** 2 for r in rmse]) / len(rmse)) ** 0.5
+
+    # compute the relative error
+    relative_errors: list = [
+        sum(abs((r[1] - c[1]) / r[1]) * 100 for r, c in zip(reference, comparison))
+        / len(reference)
+        for reference, comparison in zip(reference_data, comparison_data)
+    ]
+
+    # get the average and
+    # standard deviation
+    # of the relative errors
+    average_relative_error: float = sum(relative_errors) / len(relative_errors)
+    std_relative_error: float = (
+        sum([(r - average_relative_error) ** 2 for r in relative_errors])
+        / len(relative_errors)
+    ) ** 0.5
+
+    # print the results
+    print(f"Average RMSE: {average_rmse:.3f} [°C]")
+    print(f"Standard Deviation of RMSE: {std_rmse:.3f} [°C]")
+    print(f"Average Relative Error: {average_relative_error:.3f} [%]")
+    print(f"Standard Deviation of Relative Error: {std_relative_error:.3f} [%]")
