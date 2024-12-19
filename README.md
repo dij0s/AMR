@@ -1,6 +1,6 @@
 # Adaptive Mesh Refinement (AMR)
 
-![Before AMR](https://i.imgur.com/tgimeyW.png) ![After AMR](https://i.imgur.com/TPWP5l0.png)
+![AMR on heat transfer simulation](https://i.imgur.com/yK6xnKH.png)
 
 ## Overview
 This project deals with the implementation of an Adaptive Mesh Refinement (AMR) method for the numerical solution of problems. AMR is a numerical technique that adjusts the mesh resolution based on local problem characteristics to optimize computational resources and obtain accurate solutions.
@@ -14,28 +14,35 @@ The following sections provide a detailed overview of the project.
 *Please see the [Running the project](#running-the-project) section below for running instructions.*
 
 ## Author & Acknowledgments
-[Osmani Dion](mailto:dion.osmani@students.hevs.ch), Author, HES-SO Valais-Wallis Student, Informatique et systèmes de communication (3rd year)
+[@Osmani Dion](mailto:dion.osmani@students.hevs.ch), Author, HES-SO Valais-Wallis Student, Informatique et systèmes de communication (3rd year)
 
-[Desmons Florian](mailto:florian.desmons@hevs.ch), Supervisor, HES-SO Valais-Wallis Lecturer, Informatique et systèmes de communication
-
-
-## Getting Started
-- Quick start guide
-- Basic usage examples
-- Configuration instructions
-
-## Project Structure
-```
-project/
-├── src/
-├── tests/
-├── examples/
-├── docs/
-└── ...
-```
+[@Desmons Florian](mailto:florian.desmons@hevs.ch), Supervisor, HES-SO Valais-Wallis Lecturer, Informatique et systèmes de communication
 
 ## Technical Documentation
 ### Algorithm Description
+
+The overall simulation can be broken down into the following steps:
+
+1. **Initialization**:
+   - Create the initial mesh based on the domain size and resolution.
+   - Assign initial values to the mesh cells based on the initial physical field.
+
+2. **Time Integration**:
+   - Iterate over time steps until the final time is reached.
+   - Update the physical field at each time step.
+
+3. **Solve the Heat Equation**:
+    - Compute the heat diffusion equation using finite differences.
+    - Update the temperature field based on the computed values.
+
+4. **Adaptive Mesh Refinement**:
+    - Compute the refinement criterium based on the physical field.
+    - Refine or coarsen the mesh based on the error indicator.
+
+5. **Data Export**:
+    - Save the simulation data for visualization and analysis.
+
+
 - Detailed explanation of the AMR algorithm
 - Mathematical foundation
 - Implementation specifics

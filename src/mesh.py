@@ -27,9 +27,9 @@ class Mesh:
         """
         self._root: Node = None
 
-        self._lx: int = lx
-        self._ly: int = ly
-        self._lz: int = lz
+        self._lx: float = lx
+        self._ly: float = ly
+        self._lz: float = lz
 
         # buffer zone nodes that
         # shall not be coarsened
