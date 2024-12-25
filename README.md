@@ -3,11 +3,14 @@
 ![AMR on heat transfer simulation](https://i.imgur.com/yK6xnKH.png)
 
 ## Overview
-This project deals with the implementation of an Adaptive Mesh Refinement (AMR) method for the numerical solution of problems. AMR is a numerical technique that adjusts the mesh resolution based on local problem characteristics to optimize computational resources and obtain accurate solutions.
+This project deals with the implementation of an Adaptive Mesh Refinement (AMR) method for the numerical solution of problems.
+AMR is a numerical technique that adjusts the mesh resolution based on local problem characteristics to optimize computational resources and obtain accurate solutions.
 
-The main goal of the project is to develop such an algorithm, designed to generate Octree (3D) or Quadtree (2D) mesh based on a time-varying physical field and a specified indicator. The algorithm will dynamically refine or coarsen the mesh by analyzing changes in the physical field.
+The main goal of the project is to develop such an algorithm, designed to generate Octree (3D) or Quadtree (2D) mesh based on a time-varying physical field and a specified indicator.
+The algorithm will dynamically refine or coarsen the mesh by analyzing changes in the physical field.
 
-The algorithm is then applied to solve a continuous heat transfer problem, in two dimensions and observe the behavior of the mesh as the solution evolves over time. The results are validated by comparing them with a reference solution obtained using a uniform mesh.
+The algorithm is then applied to solve a continuous heat transfer problem, in two dimensions, and observe the behavior of the mesh as the solution evolves over time.
+The results are validated by comparing them with a reference solution obtained using a uniform mesh.
 
 The following sections provide a detailed overview of the project.
 
@@ -19,33 +22,32 @@ The following sections provide a detailed overview of the project.
 [@Desmons Florian](mailto:florian.desmons@hevs.ch), Supervisor, HES-SO Valais-Wallis Lecturer, Informatique et systèmes de communication
 
 ## Technical Documentation
+
+The following sections provide a detailed technical overview of the project, including the algorithm description, code architecture and performance considerations.
+
 ### Algorithm Description
 
-The overall simulation can be broken down into the following steps:
+The overall *simulation algorithm* can be broken down into the following steps:
 
-1. **Initialization**:
+1. Initialization:
    - Create the initial mesh based on the domain size and resolution.
-   - Assign initial values to the mesh cells based on the initial physical field.
+   - Assign initial values to the mesh cells based on the initial temperature field.
 
-2. **Time Integration**:
+2. Time Integration:
    - Iterate over time steps until the final time is reached.
-   - Update the physical field at each time step.
 
-3. **Solve the Heat Equation**:
+3. Solve the Heat Equation:
     - Compute the heat diffusion equation using finite differences.
     - Update the temperature field based on the computed values.
 
-4. **Adaptive Mesh Refinement**:
-    - Compute the refinement criterium based on the physical field.
-    - Refine or coarsen the mesh based on the error indicator.
+4. Adaptive Mesh Refinement:
+    - Evaluate the refinement criterium based on the temperature field.
+    - Refine or coarsen the mesh based on the previous criterium.
 
-5. **Data Export**:
-    - Save the simulation data for visualization and analysis.
+5. Data Export:
+    - Save the simulation data for visualization.
 
-
-- Detailed explanation of the AMR algorithm
-- Mathematical foundation
-- Implementation specifics
+The *heat equation solver* is based on the finite difference method, which discretizes the heat equation in space and time.
 
 ### Code Architecture
 - Core components and their interactions

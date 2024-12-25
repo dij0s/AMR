@@ -7,7 +7,7 @@ if TYPE_CHECKING:
     from .refinement import RefinementCriterium
 
 # Type alias for a point in the 3D space
-Point: TypeAlias = tuple[int, int, Optional[int]]
+Point: TypeAlias = tuple[float, float, Optional[float]]
 
 
 class Direction(Enum):
@@ -42,7 +42,7 @@ class Node:
     )
 
     def __init__(
-        self, value: float, level: int, origin: Point, parent: "Node" = None
+        self, value: float, level: int, origin: Point, parent: Optional["Node"] = None
     ) -> None:
         """
         Constructor for the Node class.
@@ -51,7 +51,7 @@ class Node:
                 value (float): The value of the node.
                 level (int): The level of the node.
                 origin (Point): The origin of the node in its own referential (parent Node).
-                parent (Node): The parent node of the node. It is None by default.
+                parent (Optional[Node]): The parent node of the node. It is None by default.
 
             Returns:
                 None
@@ -112,7 +112,7 @@ class Node:
         # check neighboring cells
         # levels to determine if
         # the node can be refined
-        neighbors: list[Node] = [
+        neighbors: list[Optional[Node]] = [
             self.neighbor(Direction.RIGHT),
             self.neighbor(Direction.LEFT),
             self.neighbor(Direction.UP),
@@ -203,7 +203,7 @@ class Node:
 
         # get neighboring
         # cells levels
-        neighbors: list[Optional[int]] = map(
+        neighbors: map = map(
             finest_neighbor_level,
             [Direction.RIGHT, Direction.LEFT, Direction.UP, Direction.DOWN],
         )
@@ -237,7 +237,7 @@ class Node:
         # same-level neighbor in
         # parent's children
         x, y, z = self._origin
-        adjacent_origin: Point = None
+        adjacent_origin: Optional[Point] = None
 
         match direction:
             case Direction.RIGHT:

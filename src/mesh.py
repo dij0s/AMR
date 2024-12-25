@@ -1,3 +1,4 @@
+import os
 from typing import Callable, Generator, Optional
 
 from .benchmark import Benchmark
@@ -14,22 +15,22 @@ class Mesh:
     A class used to create Mesh objects.
     """
 
-    def __init__(self, lx: float, ly: float, lz: float = None) -> None:
+    def __init__(self, lx: float, ly: float, lz: Optional[float] = None) -> None:
         """
         Constructor for the Mesh class.
             Parameters:
                 lx (float): Length of the Mesh in the x-direction [-].
                 ly (float): Length of the Mesh in the y-direction [-].
-                lz (float): Length of the Mesh in the z-direction [-]. If not provided, the Mesh is 2D.
+                lz (Optional[float]): Length of the Mesh in the z-direction [-]. If not provided, the Mesh is 2D.
 
             Returns:
                 None
         """
-        self._root: Node = None
+        self._root: Optional[Node] = None
 
         self._lx: float = lx
         self._ly: float = ly
-        self._lz: float = lz
+        self._lz: Optional[float] = lz
 
         # buffer zone nodes that
         # shall not be coarsened
@@ -41,7 +42,7 @@ class Mesh:
         leaf_value: Callable[[], float],
         lx: float,
         ly: float,
-        lz: float = None,
+        lz: Optional[float] = None,
     ) -> tuple["Mesh", int]:
         """
         Create a Mesh Tree of uniform size.
@@ -52,7 +53,7 @@ class Mesh:
                 leaf_value (Callable[float, None, None]): The function to generate the value of the leaf nodes.
                 lx (float): Length of the Mesh in the x-direction [-].
                 ly (float): Length of the Mesh in the y-direction [-].
-                lz (float): Length of the Mesh in the z-direction [-]. If not provided, the Mesh is 2D.
+                lz (Optional[float]): Length of the Mesh in the z-direction [-]. If not provided, the Mesh is 2D.
 
             Returns:
                 Mesh: The uniform Mesh Tree.
@@ -98,7 +99,7 @@ class Mesh:
         return mesh, maximal_leaf_level
 
     def create_root(
-        self, value: float, origin_x: int, origin_y: int, origin_z: int = None
+        self, value: float, origin_x: int, origin_y: int, origin_z: Optional[int] = None
     ) -> Node:
         """
         Creates the root node of a Mesh Tree.
@@ -107,7 +108,7 @@ class Mesh:
                 value (float): The value of the node.
                 origin_x (int): The x-coordinate of the origin of the node.
                 origin_y (int): The y-coordinate of the origin of the node.
-                origin_z (int): The z-coordinate of the origin of the node. By default, it is set to None (2D).
+                origin_z (Optional[int]): The z-coordinate of the origin of the node. By default, it is set to None (2D).
 
             Returns:
                 Node: The newly created node.
@@ -122,16 +123,16 @@ class Mesh:
     def refine(
         self,
         criterium: RefinementCriterium,
-        min_depth: int = None,
-        max_depth: int = None,
+        min_depth: Optional[int] = None,
+        max_depth: Optional[int] = None,
     ) -> None:
         """
         Refine and coarsen the Mesh Tree based on a refinement criterium.
 
             Parameters:
                 criterium (RefinementCriterium): The refinement criterium.
-                min_depth (int): The minimal absolute depth of the Mesh Tree. By default, it is set to None.
-                max_depth (int): The maximal absolute depth of the Mesh Tree. By default, it is set to None.
+                min_depth (Optional[int]): The minimal absolute depth of the Mesh Tree. By default, it is set to None.
+                max_depth (Optional[int]): The maximal absolute depth of the Mesh Tree. By default, it is set to None.
 
             Returns:
                 None
@@ -306,6 +307,11 @@ class Mesh:
         if not filename.endswith(".vtk"):
             filename += ".vtk"
 
+        # ensure that the output
+        # directory exists
+        if not os.path.exists("output"):
+            os.makedirs("output")
+
         # get all leaf nodes
         leaves: list[Node] = list(self.leafs())
         print(f"{len(leaves)} leaf nodes must be written into the file.")
@@ -453,11 +459,11 @@ class Mesh:
             print("VTK file written successfully.")
 
     @property
-    def root(self) -> Node:
+    def root(self) -> Optional[Node]:
         """
         Returns the root node of the Mesh Tree.
 
             Returns:
-                Node: The root node of the Mesh Tree.
+                Optional[Node]: The root node of the Mesh Tree.
         """
         return self._root

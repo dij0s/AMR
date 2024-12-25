@@ -50,7 +50,7 @@ class Benchmark:
             )
 
             # get current program process
-            self._process: int = psutil.Process(os.getpid())
+            self._process: psutil.Process = psutil.Process(os.getpid())
 
             self.start: float = time.time()
             Benchmark._initialized = True
@@ -173,13 +173,13 @@ class Benchmark:
                 None
         """
 
-        print("BENCHMARKED TIME\nFunction name\tTotal time [s] (Number of calls)")
+        print("BENCHMARKED TIME\nFunction name Total time [s] (Number of calls)")
         for key, value in self._func_times.items():
-            print(f"{key}\t{value[0]:.4}s\t({value[1]})")
+            print(f"{key}\t\t{value[0]:.4} ({value[1]})")
 
         print("BENCHMARKED SPACE\nFunction name\tMemory used [MB] (Number of calls)")
         for key, value in self._func_space.items():
-            print(f"{key}\t{value[0]:.4}MB\t({value[1]})")
+            print(f"{key}\t\t{value[0]:.4} ({value[1]})")
 
     @property
     def elapsed(self) -> float:
