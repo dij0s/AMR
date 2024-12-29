@@ -2,7 +2,7 @@ import os
 import time
 from collections import defaultdict
 from functools import wraps
-from typing import Callable
+from typing import Callable, Optional
 
 import psutil
 
@@ -14,7 +14,7 @@ class Benchmark:
     """
 
     # singleton instance
-    _instance: "Benchmark" = None
+    _instance: Optional["Benchmark"] = None
     # flag to check if the
     # class is initialized
     _initialized: bool = False

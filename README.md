@@ -1,6 +1,7 @@
 # Adaptive Mesh Refinement (AMR)
 
-![AMR on heat transfer simulation](https://i.imgur.com/yK6xnKH.png)
+![AMR on heat transfer simulation](https://i.imgur.com/Q8LpTT0.png#gh-light-mode-only)
+![AMR on heat transfer simulation](https://i.imgur.com/LhYwpfS.png#gh-dark-mode-only)
 
 ## Overview
 This project deals with the implementation of an Adaptive Mesh Refinement (AMR) method for the numerical solution of problems.
