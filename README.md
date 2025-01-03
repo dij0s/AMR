@@ -232,10 +232,10 @@ The following table provides a comparison of time and space usage when running a
 
 *Please note that the resolution of the uniform mesh (256 cells per dimension) is the maximum number of cells per dimension the adaptive mesh refinement algorithm can reach (starts at 64 cells per dimension).*
 
-| Method | Average total time +- total time std. (s) |  Average memory usage +- memory usage std. (MB) |
-| --- | --- | --- |
-| Adaptive Mesh Refinement | 22.0 +- 0.31 | 4.251 +- 0.473 |
-| Uniform Mesh | 433.4 +- 7.382 | 50.578 +- 13.736 |
+| Method                    | Average Total Time (s)      | Average Memory Usage (MB)  |
+|--------------------------|----------------------------|---------------------------|
+| Adaptive Mesh Refinement | 22.0 ± 0.31               | 4.251 ± 0.473            |
+| Uniform Mesh             | 433.4 ± 7.382             | 50.578 ± 13.736          |
 
 *The simulation has been ran 10 times, on an Intel Core i9-9980HK CPU @ 2.40GHz with 32 GB of RAM (Ubuntu 24.04)*
 
