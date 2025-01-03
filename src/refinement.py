@@ -185,7 +185,7 @@ class GradientRefinementCriterium(RefinementCriterium):
         return relative_gradient > self._threshold
 
 
-class LogScaleGradientRefinuementCriterium(RefinementCriterium):
+class LogScaleGradientRefinementCriterium(RefinementCriterium):
     """
     A class used to define a log-scaled gradient refinement criterium.
     It implements a first-order gradient approximation.

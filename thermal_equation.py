@@ -4,7 +4,7 @@ from src.benchmark import Benchmark
 from src.mesh import Mesh
 from src.node import Node
 from src.refinement import (
-    LogScaleGradientRefinuementCriterium,
+    LogScaleGradientRefinementCriterium,
 )
 from src.scheme import SecondOrderCenteredFiniteDifferences
 
@@ -120,7 +120,7 @@ def simulation():
 
     # create refinement criterium
     # based on the gradient change
-    log_criterium = LogScaleGradientRefinuementCriterium(threshold=0.1)
+    log_criterium = LogScaleGradientRefinementCriterium(threshold=0.1)
 
     # reset benchmark
     # after simulation

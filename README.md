@@ -83,6 +83,7 @@ The `src` directory contains the main source code files:
 └── benchmark.py # Benchmark class used to compare simulation data
 ```
 
+The overall architecture of the codebase is designed to be modular, extensible and efficient, allowing for easy integration of new features and optimization techniques.
 Each file is documented with detailed comments and docstrings explaining the purpose of the classes and methods.
 The codebase is structured around the following key components:
 
@@ -105,7 +106,16 @@ These methods strongly rely on the `Node` class, which represents the mesh nodes
 - The `Node` class provides many *geometrical* and *locality* methods that are extensively used by the project implementation. First, the `absolute_origin` and `absolute_centered_origin` properties recursively compute and return the node's absolute origin and center origin in the global referential system. The `adjacent` method returns the same-referential (common parent) adjacent node given its relative origin in constant time. The `neighbor` method returns the neighboring `Node` instance (when it exists) in an argument-given cardinal direction (defined in the helper `Direction` enumeration class, in the `node.py` file). The neighbor that is, in order, assumed to be an adjacent neighbor, an adjacent neighbor of the parent and finally a child of the parent's adjacent neighbor (in the mirrored direction of that we are searching for). The `buffer` method returns a list of nodes that are within a buffer distance of the node. The buffer distance is defined as the argument-given distance and is assumed to be unit-less. Hence, the distance is assumed to be a number of nodes in any given direction and of whatever level. This method also makes use of the `chain` method that eases the access of neighboring nodes in diagonal directions by chaining the `neighbor` method calls. These different methods are all implemented to ensure a constant time complexity as they are critical in every step of the mesh refinement process. This time complexity is enabled by storing the parent reference and children references in the `Node` instances and by using the relative origin to access the children nodes. In reality, the Python dictionnary access operation is of constant **average** time complexity and may only be linear if the hash function leads to many collisions. However, the low number of keys in the children dictionary ensures a low probability of collision and a constant time complexity in practice.
 - The `Node` class also provides different helper methods and properties which are used in the `Mesh` class.
 
-These methods are implemented to both handle 2D and 3D meshes.
+These methods are implemented to both handle 2D and 3D meshes and hence support the Octree and Quadtree data structures and its associated operations.
+
+
+**Refinement**:
+- The `RefinementCriterium` class represents the refinement criteria. It contains an abstract method, `eval`, that must be implemented by subclasses to define the refinement criteria logic and a helper static method `handle_neighbor` further used in gradient computation due to the interpolation need.
+- A concrete implementation of the `RefinementCriterium` class is provided with the `CustomRefinementCriterium` class. A custom function that is evaluated against a `Node` instance is provided to the class constructor and is used in the `eval` method to evaluate the refinement criteria. The `CustomRefinementCriterium` class is used in the project to quickly define a refinement criteria based on a custom function or bypass the refinement criterium, as done in the stripe-neighboring nodes refinement process.
+- The `GradientRefinementCriterium` implements a concrete implementation of the `RefinementCriterium` class. It implements a first-order two-dimensional gradient approximation using the interpolated neighboring nodes' values. Its scaled magnitude is then evaluated against a user-defined threshold to determine if said node shall be refined. A similar concrete implementation class `LogScaleGradientRefinementCriterium` is also provided to evaluate the log-scale gradient against a user-defined threshold. The log-scale allows for a greater sensitivity to small values and a better representation of the gradient's magnitude. It is used in the project to define a refinement criteria based on the temperature gradient of the heat diffusion problem.
+
+This abstract class is used to define the refinement criteria and allows for a flexible and extensible implementation of different criteria based on the user's needs.
+
 
 - Core components and their interactions
 - Class hierarchy
