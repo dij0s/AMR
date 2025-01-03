@@ -19,9 +19,9 @@ class Mesh:
         """
         Constructor for the Mesh class.
             Parameters:
-                lx (float): Length of the Mesh in the x-direction [-].
-                ly (float): Length of the Mesh in the y-direction [-].
-                lz (Optional[float]): Length of the Mesh in the z-direction [-]. If not provided, the Mesh is 2D.
+                lx (float): Length of the Mesh in the x-direction [m].
+                ly (float): Length of the Mesh in the y-direction [m].
+                lz (Optional[float]): Length of the Mesh in the z-direction [m]. If not provided, the Mesh is 2D.
 
             Returns:
                 None
@@ -31,10 +31,6 @@ class Mesh:
         self._lx: float = lx
         self._ly: float = ly
         self._lz: Optional[float] = lz
-
-        # buffer zone nodes that
-        # shall not be coarsened
-        self._buffer_zone: set[Node] = set()
 
     @staticmethod
     def uniform(
@@ -49,11 +45,10 @@ class Mesh:
 
             Parameters:
                 n (int): The number of nodes in the Mesh Tree (per dimension).
-                dimension (MeshDimension): The dimension of the Mesh Tree.
-                leaf_value (Callable[float, None, None]): The function to generate the value of the leaf nodes.
-                lx (float): Length of the Mesh in the x-direction [-].
-                ly (float): Length of the Mesh in the y-direction [-].
-                lz (Optional[float]): Length of the Mesh in the z-direction [-]. If not provided, the Mesh is 2D.
+                leaf_value (Callable[float, None, None]): The function to apply to generate the value of the leaf nodes.
+                lx (float): Length of the Mesh in the x-direction [m].
+                ly (float): Length of the Mesh in the y-direction [m].
+                lz (Optional[float]): Length of the Mesh in the z-direction [m]. If not provided, the Mesh is 2D.
 
             Returns:
                 Mesh: The uniform Mesh Tree.
@@ -220,7 +215,6 @@ class Mesh:
             # exclude parent of leaf
             # nodes that were refined
             # in the first pass
-            # if parent not in to_refine.union(self._buffer_zone):
             if parent not in to_refine.union(neighbors):
                 if parent not in parent_children:
                     parent_children[parent] = []
