@@ -12,6 +12,8 @@ AMR is a numerical technique that adjusts the mesh resolution based on local pro
 
 The main goal of the project is to develop such an algorithm, designed to generate Octree (3D) or Quadtree (2D) mesh based on a time-varying physical field and a specified indicator.
 
+The following image illustrates the Octree and Quadtree data structures used to represent the mesh hierarchy:
+
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://i.imgur.com/R5vG6YS.png">
   <source media="(prefers-color-scheme: light)" srcset="https://i.imgur.com/EKKGv5w.png">
@@ -28,9 +30,9 @@ The following sections provide a detailed overview of the project.
 *Please see the [Running the project](#running-the-project) section below for running instructions.*
 
 ## Author & Acknowledgments
-[@Osmani Dion](mailto:dion.osmani@students.hevs.ch), Author, HES-SO Valais-Wallis Student, Informatique et systèmes de communication (3rd year)
+[Osmani Dion](mailto:dion.osmani@students.hevs.ch), Author, HES-SO Valais-Wallis Student, Informatique et systèmes de communication (3rd year)
 
-[@Desmons Florian](mailto:florian.desmons@hevs.ch), Supervisor, HES-SO Valais-Wallis Lecturer, Informatique et systèmes de communication
+[Desmons Florian](mailto:florian.desmons@hevs.ch), Supervisor, HES-SO Valais-Wallis Lecturer, Informatique et systèmes de communication
 
 ## Technical Documentation
 
@@ -243,4 +245,4 @@ Moreover, I made use of the following resources to deepen my understanding of th
 
 
 The project is an original work developed as part of the HES-SO Valais-Wallis curriculum. Please note that it is intended for educational purposes only and should not be used for commercial or production purposes without proper validation and testing.
-If you have any questions or need further information, please feel free to contact me at [dion.osmani@students.hevs.ch](mailto:dion.osmani@students.hevs.ch).
+If you have any questions or need further information, please feel free to contact me at [dion(dot)osmani(at)students(dot)hevs(dot)ch](mailto:dion.osmani@students.hevs.ch).
