@@ -1,8 +1,8 @@
 # Adaptive Mesh Refinement (AMR)
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://i.imgur.com/LhYwpfS.png">
-  <source media="(prefers-color-scheme: light)" srcset="https://i.imgur.com/Q8LpTT0.png">
+  <source media="(prefers-color-scheme: dark)" srcset="https://i.imgur.com/1b05piP.png">
+  <source media="(prefers-color-scheme: light)" srcset="https://i.imgur.com/VCsUWPv.png">
   <img alt="AMR on heat diffusion simulation">
 </picture>
 
@@ -11,6 +11,13 @@ This project deals with the implementation of an Adaptive Mesh Refinement (AMR) 
 AMR is a numerical technique that adjusts the mesh resolution based on local problem characteristics to optimize computational resources and obtain accurate solutions.
 
 The main goal of the project is to develop such an algorithm, designed to generate Octree (3D) or Quadtree (2D) mesh based on a time-varying physical field and a specified indicator.
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://i.imgur.com/R5vG6YS.png">
+  <source media="(prefers-color-scheme: light)" srcset="https://i.imgur.com/EKKGv5w.png">
+  <img alt="Quadtree and Octree datastructures">
+</picture>
+
 The algorithm will dynamically refine or coarsen the mesh by analyzing changes in the physical field.
 
 The algorithm is then applied to solve a continuous heat transfer problem, in two dimensions, and observe the behavior of the mesh as the solution evolves over time.
@@ -210,7 +217,14 @@ uv run compare_lineouts.py <reference_folder/path> <comparison_folder/path>
 The order in which the folders are specified matters as the first folder is assumed to be the reference simulation data against which we compare another simulation's data.
 
 ## License
-- License information
+This project is licensed under the Creative Commons Attribution 4.0 International License (CC BY 4.0). You are free to:
+
+- Share — copy and redistribute the material in any medium, format, or channel
+- Adapt — remix, transform, and build upon the material for any purpose, even commercially
+- Under the condition that you give appropriate credit to the author(s), provide a link to the license, and indicate if changes were made. You may do so in any reasonable manner, but not in any way that suggests the author(s) endorses you or your use.
+
+You can view the full license details at: [Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by/4.0/)
+
 
 ## References
 
@@ -228,8 +242,5 @@ Moreover, I made use of the following resources to deepen my understanding of th
 **Truncation error (numerical integration)**. (2022). In *Wikipedia*. [Link](https://en.wikipedia.org/w/index.php?title=Truncation_error_(numerical_integration)&oldid=1077302811)
 
 
+The project is an original work developed as part of the HES-SO Valais-Wallis curriculum. Please note that it is intended for educational purposes only and should not be used for commercial or production purposes without proper validation and testing.
 If you have any questions or need further information, please feel free to contact me at [dion.osmani@students.hevs.ch](mailto:dion.osmani@students.hevs.ch).
-
-- Citations
-- Related work
-- Additional resources
