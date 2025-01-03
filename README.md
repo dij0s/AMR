@@ -217,30 +217,16 @@ The order in which the folders are specified matters as the first folder is assu
 I wish to thank my supervisor, Florian Desmons, for his guidance and support throughout the project. His expertise and insights have been invaluable in the development of the algorithm and the implementation of the simulation.
 Moreover, I made use of the following resources to deepen my understanding of the subject and develop the project:
 
-### Popinet, S. (2003). *Gerris: a tree-based adaptive solver for the incompressible Euler equations in complex geometries*. Journal of Computational Physics, 190(2), 572-600.
-[DOI: 10.1016/S0021-9991(03)00298-5](https://www.sciencedirect.com/science/article/pii/S0021999103002985)
-Keywords: Adaptive mesh refinement, Approximate projection method, Complex geometry, Incompressible flow
-**Abstract**: An adaptive mesh projection method for the time-dependent incompressible Euler equations is presented. The domain is spatially discretised using quad/octrees and a multilevel Poisson solver is used to obtain the pressure. Complex solid boundaries are represented using a volume-of-fluid approach. Second-order convergence in space and time is demonstrated on regular, statically and dynamically refined grids. The quad/octree discretisation proves to be very flexible and allows accurate and efficient tracking of flow features. The source code of the method implementation is freely available.
+**Berger, M. J., & Colella, P.** (1989). *Local adaptive mesh refinement for shock hydrodynamics*. *Journal of Computational Physics*, 82(1), 64–84. [DOI: 10.1016/0021-9991(89)90035-1](https://doi.org/10.1016/0021-9991(89)90035-1)
 
-```bibtex
-@article{popinet_gerris_2003,
-  title = {Gerris: a tree-based adaptive solver for the incompressible {Euler} equations in complex geometries},
-  volume = {190},
-  issn = {0021-9991},
-  shorttitle = {Gerris},
-  url = {https://www.sciencedirect.com/science/article/pii/S0021999103002985},
-  doi = {10.1016/S0021-9991(03)00298-5},
-  abstract = {An adaptive mesh projection method for the time-dependent incompressible Euler equations is presented. The domain is spatially discretised using quad/octrees and a multilevel Poisson solver is used to obtain the pressure. Complex solid boundaries are represented using a volume-of-fluid approach. Second-order convergence in space and time is demonstrated on regular, statically and dynamically refined grids. The quad/octree discretisation proves to be very flexible and allows accurate and efficient tracking of flow features. The source code of the method implementation is freely available.},
-  number = {2},
-  urldate = {2025-01-03},
-  journal = {Journal of Computational Physics},
-  author = {Popinet, Stéphane},
-  month = sep,
-  year = {2003},
-  keywords = {Adaptive mesh refinement, Approximate projection method, Complex geometry, Incompressible flow},
-  pages = {572--600},
-}
-```
+**Neumann boundary condition**. (2022). In *Wikipedia*. [Link](https://en.wikipedia.org/w/index.php?title=Neumann_boundary_condition&oldid=1078491049)
+
+**Popinet, S.** (2000). *Stabilité et formation de jets dans les bulles cavitantes* [PhD thesis, Université Pierre et Marie Curie]. [Link](https://hal.science/tel-01460748)
+
+**Popinet, S.** (2003). *Gerris: a tree-based adaptive solver for the incompressible Euler equations in complex geometries*. *Journal of Computational Physics*, 190(2), 572–600. [DOI: 10.1016/S0021-9991(03)00298-5](https://doi.org/10.1016/S0021-9991(03)00298-5)
+
+**Truncation error (numerical integration)**. (2022). In *Wikipedia*. [Link](https://en.wikipedia.org/w/index.php?title=Truncation_error_(numerical_integration)&oldid=1077302811)
+
 
 If you have any questions or need further information, please feel free to contact me at [dion.osmani@students.hevs.ch](mailto:dion.osmani@students.hevs.ch).
 
