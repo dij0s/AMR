@@ -144,23 +144,6 @@ This implementation sadly lacks support for 3D meshes and the Octree data struct
 This class is used to measure the performance of the simulation and allows for a quick and easy way to compare different implementations or configurations.
 
 
-### Performance
-- Complexity analysis
-- Benchmarks
-- Optimization techniques used
-
-## Examples & Usage
-- Detailed code examples
-- Common use cases
-- Parameter configurations
-- Best practices
-
-## Results
-- Validation results
-- Performance metrics
-- Visualization of example outputs
-- Comparison with other methods (if applicable)
-
 ## Running the project
 The project has been developed in Python using [uv](https://astral.sh/blog/uv), an extremely fast Python package installer and resolver, written in Rust, and designed as a drop-in-replacement for pip and pip-tools workflows.
 
@@ -217,6 +200,55 @@ uv run compare_lineouts.py <reference_folder/path> <comparison_folder/path>
 ```
 
 The order in which the folders are specified matters as the first folder is assumed to be the reference simulation data against which we compare another simulation's data.
+
+### Running the tests
+
+The project includes a set of tests to validate the implementation and ensure the correctness of the algorithm.
+The tests are implemented using the `pytest` framework and are located in the `tests` directory.
+
+To run the tests, you can use the following command:
+
+```bash
+uv run pytest
+```
+
+The tests are also automatically run as the code is pushed to the repository using GitHub Actions.
+
+
+## Performance and results
+
+This section provides an overview of the performance considerations and optimizations used in the project.
+
+As noted in the [Code Architecture](#code-architecture) section, the implementation is designed to be efficient and optimized for performance. The codebase is structured around the Octree and Quadtree data structures, which allow for a more efficient representation of the mesh hierarchy and a more efficient use of computational resources.
+
+The time complexity is optimized using a recursive structure that allows for a constant time complexity for the access operation. The memory usage is optimized using the `__slots__` attribute to reduce the memory overhead of the class instances and ensure a more efficient memory usage.
+Both time and space complexity aren't optimized further as it is not the main focus of the project and the implementation is already efficient enough for the problem at hand.
+
+PARLER DES PERFORMANCES DU SLOTTING ICI ?
+
+Implementing the parallelization of the algorithm could be a potential optimization to further improve the performance of the simulation. By parallelizing the mesh refinement process, the algorithm could take advantage of multi-core processors and distribute the workload across multiple threads. This would allow for a more efficient use of computational resources and reduce the overall simulation time.
+
+The following table provides a comparison of time and space usage when running a heat transfer simulation with and without adaptive mesh refinement (10s diffusion, 0.01s delta) :
+
+*Please note that the resolution of the uniform mesh (256 cells per dimension) is the maximum number of cells per dimension the adaptive mesh refinement algorithm can reach (starts at 64 cells per dimension).*
+
+| Method | Average total time +- total time std. (s) |  Average memory usage +- memory usage std. (MB) |
+| --- | --- | --- |
+| Adaptive Mesh Refinement | 22.0 +- 0.31 | 4.251 +- 0.473 |
+| Uniform Mesh | 433.4 +- 7.382 | 50.578 +- 13.736 |
+
+*The simulation has been ran 10 times, on an Intel Core i9-9980HK CPU @ 2.40GHz with 32 GB of RAM (Ubuntu 24.04)*
+
+The results show a significant improvement in both time and memory usage when using adaptive mesh refinement compared to a uniform mesh. The adaptive mesh refinement algorithm allows for a more efficient use of computational resources but comes with a tradeoff as the solution may not be as accurate as a uniform mesh solution.
+
+- Complexity analysis
+- Benchmarks
+- Optimization techniques used
+- Validation results
+- Performance metrics
+- Visualization of example outputs
+- Comparison with other methods (if applicable)
+
 
 ## License
 This project is licensed under the Creative Commons Attribution 4.0 International License (CC BY 4.0). You are free to:
