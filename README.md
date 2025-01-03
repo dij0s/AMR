@@ -115,12 +115,25 @@ These methods are implemented to both handle 2D and 3D meshes and hence support 
 - The `GradientRefinementCriterium` implements a concrete implementation of the `RefinementCriterium` class. It implements a first-order two-dimensional gradient approximation using the interpolated neighboring nodes' values. Its scaled magnitude is then evaluated against a user-defined threshold to determine if said node shall be refined. A similar concrete implementation class `LogScaleGradientRefinementCriterium` is also provided to evaluate the log-scale gradient against a user-defined threshold. The log-scale allows for a greater sensitivity to small values and a better representation of the gradient's magnitude. It is used in the project to define a refinement criteria based on the temperature gradient of the heat diffusion problem.
 
 This abstract class is used to define the refinement criteria and allows for a flexible and extensible implementation of different criteria based on the user's needs.
+This implementation, though, lacks support for 3D meshes and the Octree data structure due to the two-dimensional gradient calculation. It is, however, easily extensible to support 3D meshes and the Octree data structure by implementing the `eval` method and the helper methods accordingly.
 
 
-- Core components and their interactions
-- Class hierarchy
-- Key data structures
-- Important functions/methods
+**Scheme**:
+- The `NumericalScheme` class represents the numerical scheme solver and contains an `apply` method that must be implemented by subclasses to define the numerical scheme logic that is applied to an argument-given list of nodes.
+- A concrete implementation of the `NumericalScheme` class is provided with the `SecondOrderCenteredFiniteDifferences` class. It implements a second-order centered finite differences scheme and Neumann boundaries as the domain is assumed to be conservative. The scheme is applied to the mesh nodes in the `Mesh` class to compute the temperature field at the next time step in the `solve` method.
+
+This abstract class is used to define the numerical scheme and allows for a flexible and extensible implementation of different numerical schemes based on the user's needs.
+This implementation sadly lacks support for 3D meshes and the Octree data structure due to the two-dimensional gradient calculation. It is, however, easily extensible to support 3D meshes and the Octree data structure by implementing the `apply` method accordingly.
+
+
+**Benchmark**:
+- The `Benchmark` class represents the benchmarking tool and contains methods that help measure the performance of the simulation, in time and memory usage.
+- The `Benchmark` class is implemented as a singleton class as it allows for a single instance to be used throughout the project and ensures consistent benchmarking results for individual functions or methods.
+- The `Benchmark` class provides different decorators for different needs. The `repeat` decorator repeats the decorated function a user-defined number of times. The `time` decorator measures the execution time of the decorated function and, finally, the `memory` decorator measures the memory usage of the decorated function.
+- The benchmarking can be reset at any given time using the corresponding method `reset` and the results of the benchmarking are stored in a dictionary and can be displayed in a human-readable format using the `display` method.
+
+This class is used to measure the performance of the simulation and allows for a quick and easy way to compare different implementations or configurations.
+
 
 ### Performance
 - Complexity analysis
