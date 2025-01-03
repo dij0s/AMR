@@ -12,7 +12,7 @@ Point: TypeAlias = tuple[float, float, Optional[float]]
 
 class Direction(Enum):
     """
-    Helper class to represent the direction of a neighbor.
+    Helper class used to represent the direction of a neighbor.
     """
 
     RIGHT = auto()
