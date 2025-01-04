@@ -17,6 +17,3 @@ output/
 
 # Benchmarking outputs
 benchmarking/
-
-# VisIt database exports
-export/
