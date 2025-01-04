@@ -125,7 +125,7 @@ These methods strongly rely on the `Node` class, which represents the mesh nodes
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://i.imgur.com/1xvijgp.png">
   <source media="(prefers-color-scheme: light)" srcset="https://i.imgur.com/jpPcrFn.png">
-  <img alt="Mesh coordinates referential" style="max-width: 80%">
+  <img alt="Mesh coordinates referential">
 </picture>
 
 - The `Node` instance children are stored in a dictionary with keys corresponding to the relative origin of the child node in the parent referential. This allows for a quick access to the children nodes and ensures a constant time complexity for the access operation as it is based on the Python dictionary data structure.
@@ -135,7 +135,14 @@ These methods strongly rely on the `Node` class, which represents the mesh nodes
 - The `Node` class provides many *geometrical* and *locality* methods that are extensively used by the project implementation. First, the `absolute_origin` and `absolute_centered_origin` properties recursively compute and return the node's absolute origin and center origin in the global referential system. The `adjacent` method returns the local-referential (common parent) adjacent node given its relative origin in constant time. The `neighbor` method returns the neighboring `Node` instance (when it exists) in an argument-given cardinal direction (defined in the helper `Direction` enumeration class, in the `node.py` file). The neighbor that is, in order, assumed to be an adjacent neighbor, an adjacent neighbor of the parent and finally a child of the parent's adjacent neighbor (in the mirrored direction of that we are searching for). The `buffer` method returns a list of nodes that are within a buffer distance of the node. The buffer distance is defined as the argument-given distance and is assumed to be unit-less. Hence, the *distance* is assumed to be a number of nodes in any given direction and of whatever level. This method also makes use of the `chain` method that eases the access of neighboring nodes in diagonal directions by chaining the `neighbor` method calls. These different methods are all implemented to ensure a constant time complexity as they are critical in every step of the mesh refinement process. This time complexity is enabled by storing the parent reference and children references in the `Node` instances and by using the relative origin to access the children nodes. In reality, the Python dictionnary access operation is of constant **average** time complexity and may only be linear in worst case if the hash function leads to many collisions. However, the low number of keys (4 in a Quadtree structure and 8 in a Octree structure) in the children dictionary ensures a close to zero probability of collision and a constant time complexity in practice.
 - The `Node` class also provides different helper methods and properties which are used in the `Mesh` class.
 
-The basic AMR logic is well implemented for both 2D and 3D meshes and hence supports the Quadtree and Octree data structures.
+The basic AMR logic is well implemented for both 2D and 3D meshes and hence supports the Quadtree and Octree data structures. The following image illustrates the mesh refinement process in an Octree structure:
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://i.imgur.com/zSshMh4.png">
+  <source media="(prefers-color-scheme: light)" srcset="https://i.imgur.com/RuTN1D7.png">
+  <img alt="Refinement applied on an Octree structure.">
+</picture>
+
 The, as described, *geometrical* and *locality* methods, sadly, are not implemented for 3D meshes and the Octree data structure. This is due to the extra complexity of the 3D space and the Octree data structure. The implementation is, however, easily extensible to support 3D meshes and the Octree data structure by implementing the methods accordingly.
 This logic is further needed for numerical schemes that require a more complex neighborhood access and geometrical operations in the 3D space.
 

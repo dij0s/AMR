@@ -126,8 +126,8 @@ class Mesh:
 
             Parameters:
                 criterium (RefinementCriterium): The refinement criterium.
-                min_depth (Optional[int]): The minimal absolute depth of the Mesh Tree. By default, it is set to None.
-                max_depth (Optional[int]): The maximal absolute depth of the Mesh Tree. By default, it is set to None.
+                min_depth (Optional[int]): The minimal absolute depth of the Mesh Tree. By default, it is set to None but it should absolutely be set.
+                max_depth (Optional[int]): The maximal absolute depth of the Mesh Tree. By default, it is set to None but it should absolutely be set.
 
             Returns:
                 None
