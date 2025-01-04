@@ -185,6 +185,7 @@ uv run thermal_equation.py
 ```
 
 This will execute the main script of the project used to solve the heat transfer problem.
+The script will save the simulation data in the `output/` directory and display the benchmarking results at the end of the simulation.
 
 One can also provide an extra argument to the script to specify the number of iterations to run:
 
@@ -221,14 +222,78 @@ CP: float = 204.0  # specific heat capacity [J/kg/K]
 LAMBDA: float = 1.026  # thermal conductivity [W/m/K]
 ```
 
-### Running the benchmark
-A preset of lineout Curve2D VisIt export folders are available in the `export/` directory. You can run the tests using the following command:
+For visualization purposes, the script does not, by default, check that the stability conditions are met.
+One can easily make sure that the stability conditions are met by uncommenting the following lines:
+
+```python
+# check stability condition
+# if not DT < (RHO / (LAMBDA * CP * DX**2)) * 0.3:
+#     print(f"DT: {DT}s ≮ {((RHO / (LAMBDA * CP * DX**2)) * 0.3):.4}s")
+#     raise ValueError(
+#         "Stability condition not met! Please provide a smaller time step."
+#     )
+
+# uncomment the lines above to check the stability condition
+
+# check stability condition
+if not DT < (RHO / (LAMBDA * CP * DX**2)) * 0.3:
+    print(f"DT: {DT}s ≮ {((RHO / (LAMBDA * CP * DX**2)) * 0.3):.4}s")
+    raise ValueError(
+        "Stability condition not met! Please provide a smaller time step."
+    )
+```
+
+The script injects a circular heat source of 2.0 meters radius at the center of the domain. One can easily modify the heat source by editing the `heat_source` method in the script as follows:
+
+```python
+# inject values into tree
+# to represent source of heat
+def heat_source(node: Node) -> None:
+    # some arbitrary condition
+    ...
+
+    # assign value to node
+    node.value = ...
+```
+
+One could also easily modify the refinement criteria by making use of a `CustomRefinementCriterium` instance and providing a custom function to the class constructor as follows:
+
+```python
+# create refinement criterium
+# based on the gradient change
+criterium = LogScaleGradientRefinementCriterium(threshold=0.1)
+
+# replace this by a custom criteria
+
+# create refinement criterium
+# based on the gradient change
+criterium = CustomRefinementCriterium(lambda node: node.value > 0.5)
+```
+
+### Running the validation
+
+A script is provided to compare the simulation data with a reference simulation data obtained using a uniform mesh.
+
+A preset of lineout Curve2D VisIt export folders are available in the `export/` directory.
+```bash
+├── mesh-amr-r1/    # Adaptive Mesh Refinement, up-to 1 level of refinement (up-to 128 cells per dimension)
+├── mesh-amr-r2/    # Adaptive Mesh Refinement, up-to 2 levels of refinement (up-to 256 cells per dimension)
+└── mesh-no-amr/    # Uniform Mesh (256 cells per dimension)
+```
+
+You can run the comparison script using the following command:
 
 ```bash
 uv run compare_lineouts.py <reference_folder/path> <comparison_folder/path>
 ```
 
 The order in which the folders are specified matters as the first folder is assumed to be the reference simulation data against which we compare another simulation's data.
+
+Hence, to compare the Adaptive Mesh Refinement simulation data with the Uniform Mesh simulation data, you can use the following command:
+
+```bash
+uv run compare_lineouts.py export/mesh-no-amr export/mesh-amr-r[1,2]
+```
 
 ### Running the tests
 
@@ -252,6 +317,8 @@ As noted in the [Code Architecture](#code-architecture) section, the implementat
 
 The time complexity is optimized using a recursive structure that allows for a constant time complexity for the access operation. The memory usage is optimized using the `__slots__` attribute to reduce the memory footprint of the class instances and ensure a more efficient memory usage.
 
+The Python SQL toolkit [SQLAlchemy](https://www.sqlalchemy.org/), for example, uses the `__slots__` (as discussed [here](https://docs.sqlalchemy.org/en/14/changelog/migration_10.html#significant-improvements-in-structural-memory-use) attribute to optimize the memory usage of the class instances and reduce the memory overhead of the ORM objects. This optimization is critical in the project as the number of nodes grows exponentially with the mesh resolution and the memory usage must be optimized to handle large meshes efficiently.
+Many more examples of the `__slots__` attribute usage can be found in the Python standard library and in popular libraries.
 
 Implementing the parallelization of the algorithm could be a potential optimization to further improve the performance of the simulation. By parallelizing the mesh refinement process, the algorithm could take advantage of multi-core processors and distribute the workload across multiple threads. This would allow for a more efficient use of computational resources and reduce the overall simulation time.
 As per data storage, the physical locality (in RAM) of the mesh structure would allow for a more efficient parallelization of the algorithm as the data would be stored in contiguous memory blocks and allow for a more efficient access pattern. This could be achieved by storing the mesh structure in a contiguous memory block and using a linear indexing scheme to access the nodes. This would allow for a more efficient access pattern and reduce the memory overhead of the mesh structure.
@@ -259,7 +326,7 @@ As per data storage, the physical locality (in RAM) of the mesh structure would 
 Both time and space complexity aren't optimized further as it is not the main focus of the project and the implementation is already efficient enough for the problem at hand.
 
 
-The following table provides a comparison of time and space usage when running a heat transfer simulation of a continuous heat source with and without adaptive mesh refinement (10s simulation time, 0.01s delta):
+The following table provides a comparison of time and space usage when running a heat transfer simulation of a continuous heat source with and without adaptive mesh refinement (10s simulation time, 0.01s delta, 20 refinements/records):
 
 *Please note that the resolution of the uniform mesh (256 cells per dimension) is the maximum number of cells per dimension the adaptive mesh refinement algorithm can reach (starts at 64 cells per dimension). The Uniform Mesh used for reference is implemented using the Quadtree data structure as implemented in the project.*
 
@@ -270,16 +337,32 @@ The following table provides a comparison of time and space usage when running a
 
 *The simulation has been ran 10 times, on an Intel Core i9-9980HK CPU @ 2.40GHz with 32 GB of RAM (Ubuntu 24.04)*
 
-The results show a significant improvement in both time (~19.7x) and memory usage (~11.9x) when using adaptive mesh refinement compared to a uniform mesh. The adaptive mesh refinement algorithm allows for a more efficient use of computational resources but comes with a tradeoff as the solution may not be as accurate as a uniform mesh solution.
+The results show a significant improvement in both time (~19.7x) and memory usage (~11.9x) when using adaptive mesh refinement compared to a uniform mesh.
+The most time-consuming part of the simulation is the mesh numerical scheme solver, which is applied to each cell in the mesh and accounts for approximately 90% of the total time in both cases. In the adaptive mesh refinement case, the refinement process accounts for ~4.7% of the total time and is responsible for the increased efficiency of the algorithm by reducing the number of cells that need to be solved. It is only done every 50 iterations, which allows for a more efficient use of computational resources and a faster simulation time.
+
+The adaptive mesh refinement algorithm allows for a more efficient use of computational resources but comes with a tradeoff as the solution may not be as accurate as a uniform mesh solution.
+
+When running the comparison script for both an AMR simulation with a maximum of 2 levels of refinement and an AMR simulation with a maximum of 1 level of refinement against a Uniform Mesh simulation (256 cells per dimension), the following results are obtained:
+
+| Method | Average RMSE (Root Mean Square Error) [°C] | Average Relative Error [%] | Total Time [s] |
+|--------|------------------|-------------------|--|
+| +1 level AMR (128-256 cells per dimension) | 0.264 ± 0.501 | 1.034 ± 0.980 | 4278 |
+| +2 level AMR (64-256 cells per dimension) | 8.450 ± 2.042 | 17.833 ± 6.422 | 1078 |
+
+At first glance, the results show that the AMR simulation with a maximum of 1 level of refinement provides a more accurate solution compared to the Uniform Mesh simulation, with a lower RMSE and relative error.
+However, this is partially true as this greater similartiy with the reference uniform mesh is due to a few things.
+
+Applying a second-order numerical scheme on a uniform mesh leads to sharper gradients getting averaged over a larger area. This averaging effect spreads out and diffuses the solution. Accumulating the error over time steps leads to a visually faster diffusion of the heat source.
+Moreover, the discretization of the mesh introduces truncation errors which pronounce the artificial diffusion effect. The adaptive mesh refinement algorithm, on the other hand, allows for a higher resolution at the boundaries of the heat source (throughout the gradients) and a lower resolution elsewhere. This leads to a more accurate representation of the heat source and a more accurate solution to the heat transfer problem.
+The fact that, when initialized, the heat source is of lower resolution than the uniform mesh (4x smaller) also explains why the AMR simulation with a maximum of 1 level of refinement provides a more accurate solution compared to the 2 level refinement one.
 
 - Complexity analysis
-- Benchmarks
-- Optimization techniques used
 - Validation results
-- Performance metrics
 - Visualization of example outputs
-- Comparison with other methods (if applicable)
 
+
+## Conclusion
+This project has been an enriching journey, providing deep insights into adaptive mesh refinement techniques and their practical implications. Through implementation, I gained a thorough understanding of both the advantages and limitations of AMR methods. While AMR offers significant computational benefits, I learned how it also introduces complexities around mesh quality, refinement strategies, and solution accuracy. Exploring these tradeoffs between performance and precision has given me valuable perspective on numerical methods and scientific computing.
 
 ## License
 This project is licensed under the Creative Commons Attribution 4.0 International License (CC BY 4.0). You are free to:

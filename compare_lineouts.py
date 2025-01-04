@@ -32,38 +32,6 @@ def parse_lineout(filepath: str) -> list:
     ]
 
 
-def interpolate(reference_keys: list, comparison_data: list) -> list:
-    """
-    Helper function to interpolate the comparison data to the reference keys.
-
-        Parameters:
-            reference_keys (list): the reference keys
-            comparison_data (list): the comparison data
-
-        Returns:
-            list: the interpolated comparison data
-    """
-
-    # get the comparison keys
-    comparison_keys = [data[0] for data in comparison_data]
-
-    # interpolate the comparison data
-    # to the reference keys by finding
-    # the closest key
-    return [
-        (
-            key,
-            comparison_data[
-                min(
-                    range(len(comparison_keys)),
-                    key=lambda i: abs(comparison_keys[i] - key),
-                )
-            ][1],
-        )
-        for key in reference_keys
-    ]
-
-
 if __name__ == "__main__":
     # get both lineout folders
     # from console arguments
@@ -99,14 +67,8 @@ if __name__ == "__main__":
     reference_data: list = [
         parse_lineout(os.path.join(reference_folder, file)) for file in reference_files
     ]
-    # interpolate the comparison data
-    # to the reference data
     comparison_data: list = [
-        interpolate(
-            [r[0] for r in reference],
-            parse_lineout(os.path.join(comparison_folder, file)),
-        )
-        for reference, file in zip(reference_data, comparison_files)
+        parse_lineout(os.path.join(comparison_folder, file)) for file in comparison_files
     ]
 
     # compute the RMSE in [°C]

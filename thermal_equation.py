@@ -41,7 +41,7 @@ def simulation():
     MAX_RELATIVE_DEPTH: int = 2  # maximum depth of the tree (relative to the base cell)
 
     # spatial
-    N: int = 64  # number of cells per dimension
+    N: int = 256  # number of cells per dimension
     LX: float = 10.0  # length of the domain in x [m]
     LY: float = 10.0  # length of the domain in y [m]
     DX: float = LX / (
@@ -120,7 +120,7 @@ def simulation():
 
     # create refinement criterium
     # based on the gradient change
-    log_criterium = LogScaleGradientRefinementCriterium(threshold=0.1)
+    criterium = LogScaleGradientRefinementCriterium(threshold=0.1)
 
     # reset benchmark
     # after simulation
@@ -148,11 +148,11 @@ def simulation():
 
             # refine mesh based
             # on constraints
-            mesh.refine(
-                log_criterium,
-                min_depth=min_absolute_depth,
-                max_depth=max_absolute_depth,
-            )
+            # mesh.refine(
+            #     criterium,
+            #     min_depth=min_absolute_depth,
+            #     max_depth=max_absolute_depth,
+            # )
 
             # save mesh state
             mesh.save(f"mesh_t{step:05}.vtk")
