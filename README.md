@@ -120,10 +120,10 @@ These methods strongly rely on the `Node` class, which represents the mesh nodes
 
 **Node**:
 - The `Node` class represents the mesh nodes and contains methods for node initialization, data storage and much more.
-- A `Node` instance is defined by its value, its level in the mesh hierarchy, its parent node reference and its relative origin. The origin is set to the top-left corner of the cell and it is relative to the parent cell's referential. Hence, each individual node has its own referential system with children nodes of relative size 1 in any direction. This can be seen on the following image:
+- A `Node` instance is defined by its value, its level in the mesh hierarchy, its parent node reference and its relative origin. The origin is set to the top-left corner of the cell and it is relative to the parent cell's referential. Hence, each individual node has its own referential system with children nodes of relative size 1 in any direction. This is better illustrated in the following image:
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://i.imgur.com/w8ZOQ5Z.png">
+<picture style="max-width: 80%">
+  <source media="(prefers-color-scheme: dark)" srcset="https://i.imgur.com/1xvijgp.png">
   <source media="(prefers-color-scheme: light)" srcset="https://i.imgur.com/jpPcrFn.png">
   <img alt="Mesh coordinates referential">
 </picture>
