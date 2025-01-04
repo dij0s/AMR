@@ -38,17 +38,17 @@ def simulation():
     MIN_RELATIVE_DEPTH: int = (
         -3
     )  # minimum depth of the tree (relative to the base cell)
-    MAX_RELATIVE_DEPTH: int = 2  # maximum depth of the tree (relative to the base cell)
+    MAX_RELATIVE_DEPTH: int = 1  # maximum depth of the tree (relative to the base cell)
 
     # spatial
-    N: int = 256  # number of cells per dimension
+    N: int = 32  # number of cells per dimension
     LX: float = 10.0  # length of the domain in x [m]
     LY: float = 10.0  # length of the domain in y [m]
     DX: float = LX / (
-        N / 2**MAX_RELATIVE_DEPTH
+        (N - 1) * 2**MAX_RELATIVE_DEPTH
     )  # spatial step in x (smallest cell) [m]
     DY: float = LY / (
-        N / 2**MAX_RELATIVE_DEPTH
+        (N - 1) * 2**MAX_RELATIVE_DEPTH
     )  # spatial step in y (smallest cell) [m]
 
     # temporal
@@ -67,8 +67,8 @@ def simulation():
     # CP: float = 1004.0  # specific heat capacity [J/kg/K]
     # LAMBDA: float = 0.026  # thermal conductivity [W/m/K]
     RHO: float = 0.06  # density [kg/m^3]
-    CP: float = 204.0  # specific heat capacity [J/kg/K]
-    LAMBDA: float = 1.026  # thermal conductivity [W/m/K]
+    CP: float = 404.0  # specific heat capacity [J/kg/K]
+    LAMBDA: float = 0.026  # thermal conductivity [W/m/K]
 
     LAPLACIAN_FACTOR: float = DT * LAMBDA / RHO / CP  # Laplacian factor
 
@@ -148,11 +148,11 @@ def simulation():
 
             # refine mesh based
             # on constraints
-            # mesh.refine(
-            #     criterium,
-            #     min_depth=min_absolute_depth,
-            #     max_depth=max_absolute_depth,
-            # )
+            mesh.refine(
+                criterium,
+                min_depth=min_absolute_depth,
+                max_depth=max_absolute_depth,
+            )
 
             # save mesh state
             mesh.save(f"mesh_t{step:05}.vtk")

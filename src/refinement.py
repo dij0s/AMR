@@ -253,9 +253,6 @@ class LogScaleGradientRefinementCriterium(RefinementCriterium):
         # compute logarithm gradient
         relative_gradient = log(relative_gradient + 1)
 
-        # scale gradient
-        relative_gradient = relative_gradient * 10.0
-
         node.gradient = relative_gradient
 
         return relative_gradient > self._threshold
