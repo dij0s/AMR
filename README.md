@@ -122,10 +122,10 @@ These methods strongly rely on the `Node` class, which represents the mesh nodes
 - The `Node` class represents the mesh nodes and contains methods for node initialization, data storage and much more.
 - A `Node` instance is defined by its value, its level in the mesh hierarchy, its parent node reference and its relative origin. The origin is set to the top-left corner of the cell and it is relative to the parent cell's referential. Hence, each individual node has its own referential system with children nodes of relative size 1 in any direction. This is better illustrated in the following image:
 
-<picture style="max-width: 80%">
+<picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://i.imgur.com/1xvijgp.png">
   <source media="(prefers-color-scheme: light)" srcset="https://i.imgur.com/jpPcrFn.png">
-  <img alt="Mesh coordinates referential">
+  <img alt="Mesh coordinates referential" style="max-width: 80%">
 </picture>
 
 - The `Node` instance children are stored in a dictionary with keys corresponding to the relative origin of the child node in the parent referential. This allows for a quick access to the children nodes and ensures a constant time complexity for the access operation as it is based on the Python dictionary data structure.
