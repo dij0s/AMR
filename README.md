@@ -20,14 +20,23 @@ The following image illustrates the Octree and Quadtree data structures used to 
   <img alt="Quadtree and Octree datastructures">
 </picture>
 
+A Quadtree or Octree mesh consists of cells that can be recursively subdivided into smaller cells. The level of a cell represents its depth in this recursive subdivision hierarchy - the root cell starts at level 0, and each subdivision increases the level by 1.
+
+When a cell is refined, it is split into 4 equal child cells in a Quadtree and in 8 equal child cells in an Octree.
+
+The level difference between adjacent cells is constrained to be at most 1 to ensure smooth transitions in mesh resolution. This means a cell can only interface with neighbors that are either at the same level, one level finer, or one level coarser.
+
+Higher levels correspond to finer mesh resolution, allowing increased detail in regions of interest while maintaining efficiency by using coarser cells elsewhere.
 The algorithm will dynamically refine or coarsen the mesh by analyzing changes in the physical field.
 
 The algorithm is then applied to solve a continuous heat transfer problem, in two dimensions, and observe the behavior of the mesh as the solution evolves over time.
 The results are validated by comparing them with a reference solution obtained using a uniform mesh.
 
-The following sections provide a detailed overview of the project.
+The project is implemented in Python 3.12.
 
 *Please see the [Running the project](#running-the-project) section below for running instructions*
+
+The following sections provide a detailed overview of the project.
 
 ## Author & Acknowledgments
 [Osmani Dion](mailto:dion.osmani@students.hevs.ch), Author, HES-SO Valais-Wallis Student, Informatique et systèmes de communication (3rd year)
@@ -223,12 +232,14 @@ This section provides an overview of the performance considerations and optimiza
 
 As noted in the [Code Architecture](#code-architecture) section, the implementation is designed to be efficient and optimized for performance. The codebase is structured around the Octree and Quadtree data structures, which allow for a more efficient representation of the mesh hierarchy and a more efficient use of computational resources.
 
-The time complexity is optimized using a recursive structure that allows for a constant time complexity for the access operation. The memory usage is optimized using the `__slots__` attribute to reduce the memory overhead of the class instances and ensure a more efficient memory usage.
-Both time and space complexity aren't optimized further as it is not the main focus of the project and the implementation is already efficient enough for the problem at hand.
+The time complexity is optimized using a recursive structure that allows for a constant time complexity for the access operation. The memory usage is optimized using the `__slots__` attribute to reduce the memory footprint of the class instances and ensure a more efficient memory usage.
 
-PARLER DES PERFORMANCES DU SLOTTING ICI ?
 
 Implementing the parallelization of the algorithm could be a potential optimization to further improve the performance of the simulation. By parallelizing the mesh refinement process, the algorithm could take advantage of multi-core processors and distribute the workload across multiple threads. This would allow for a more efficient use of computational resources and reduce the overall simulation time.
+As per data storage, the physical locality (in RAM) of the mesh structure would allow for a more efficient parallelization of the algorithm as the data would be stored in contiguous memory blocks and allow for a more efficient access pattern. This could be achieved by storing the mesh structure in a contiguous memory block and using a linear indexing scheme to access the nodes. This would allow for a more efficient access pattern and reduce the memory overhead of the mesh structure.
+
+Both time and space complexity aren't optimized further as it is not the main focus of the project and the implementation is already efficient enough for the problem at hand.
+
 
 The following table provides a comparison of time and space usage when running a heat transfer simulation of a continuous heat source with and without adaptive mesh refinement (10s simulation time, 0.01s delta):
 
