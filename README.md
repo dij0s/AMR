@@ -27,7 +27,7 @@ The results are validated by comparing them with a reference solution obtained u
 
 The following sections provide a detailed overview of the project.
 
-*Please see the [Running the project](#running-the-project) section below for running instructions.*
+*Please see the [Running the project](#running-the-project) section below for running instructions*
 
 ## Author & Acknowledgments
 [Osmani Dion](mailto:dion.osmani@students.hevs.ch), Author, HES-SO Valais-Wallis Student, Informatique et systèmes de communication (3rd year)
@@ -68,18 +68,18 @@ The overall *simulation algorithm* can be broken down into the following steps:
     - Update the temperature field based on the computed values.
 
 4. Adaptive Mesh Refinement (only done every few iterations):
-    - Evaluate the refinement criterium based on the temperature field.
-    - Refine or coarsen the mesh based on the previous criterium.
+    - Evaluate the refinement criteria based on the temperature field.
+    - Refine or coarsen the mesh based on the previous criteria.
 
 5. Data Export:
     - Save the simulation data for visualization.
 
 The *adaptive mesh refinement algorithm* can be described as follows:
 
-1. Compute the refinement indicator for each cell based on the log-scale temperature gradient.
-2. Compare the indicator with a threshold to decide whether to refine or coarsen the cell.
+1. Compute the refinement indicator for each cell.
+2. Compare the indicator with a threshold to decide whether or not to refine the cell.
 3. Refine the cell and its neighboring cells by splitting it into smaller cells or coarsen it by merging it with neighboring cells.
-4. Update the mesh structure and redistribute the temperature values accordingly using a linear interpolation.
+4. Update the mesh structure and redistribute the temperature values accordingly.
 
 ### Code Architecture
 
@@ -98,28 +98,30 @@ The codebase is structured around the following key components:
 
 **Mesh**:
 - The `Mesh` class represents the computational mesh and contains methods for mesh initialization, refinement, data storage and much more.
-- A `Mesh` instance is defined by its root cell, which is recursively subdivided into smaller cells. This recursive structure defines the mesh hierarchy and implements the Octree/Quadtree data structure.
+- A `Mesh` instance is defined by its root cell, which is recursively subdivided into smaller cells. This recursive structure defines the mesh hierarchy and implements the Octree/Quadtree data structure in a bidirectional-tree structure where each node has a reference to its parent and children nodes.
 - The `Mesh` class provides two main methods to initialize the mesh: `uniform`, a static method and `create_root`, a class method. The first one creates a uniform mesh based on the argument-defined resolution (defined throughout the number of cells per dimension, `n`) and domain size, while the latter creates the root cell of the mesh without creating its children.
-- The `Mesh` class provides a single mesh refinement endpoint method, `refine`, which is responsible for refining or coarsening the mesh based on the argument-given refinement criteria and depth constraints. The method ensures that modification of the structure does not yield any greater than one level difference. The method evaluates the refinement criteria against the leaf cells of the mesh and, when marked for refinement, refines its neighboring cells before splitting the cell itself. This allows for a *strip-like* refinement pattern that ensures a greater resolution at the boundaries of the refined region. After the refinement process, the refinement criteria is again evaluated on the non-previously refined cells parent cells to evaluate if said parent cells should be coarsened. If they shall be coarsened and their children are not marked for refinement, the parent cell is coarsened and its children are removed from the mesh. The mesh integrity is ensured at any given operation and does not exceed the depth constraints.
-- The `Mesh` class provides different *helper* methods designed to offer an easy-of-use API and allow for a better user-experience. The `solve` method applies an argument-given numerical scheme to the mesh, the `inject` method applies a function to the mesh nodes, the `leafs` and `root` methods return a Generator of the leaf cells and the root cell of the mesh, respectively, and the `save` method exports the mesh data to a VTK file.
+- The `Mesh` class provides a single mesh refinement endpoint method, `refine`, which is responsible for refining or coarsening the mesh based on the argument-given refinement criteria and depth constraints. The method ensures that modification of the structure does not yield any greater than one level difference between two adjacent cells. The method evaluates the refinement criteria against the cells of the mesh and, when marked for refinement, splits its neighboring cells before splitting the cell itself. This allows for a *strip-like* refinement pattern that ensures a greater resolution at the boundaries of the refined region. After the refinement process, the refinement criteria is again evaluated on the non-previously refined cells' parent cell to evaluate if said parent cell should be coarsened. If they shall be coarsened and their children are not marked for refinement then, the parent cell is coarsened and its children are removed from the mesh. The mesh integrity is ensured at any given operation and does not exceed the depth constraints.
+- The `Mesh` class provides different *helper* methods designed to offer an easy-of-use API and allow for a better user-experience. The `solve` method applies an argument-given numerical scheme (see [Scheme](#scheme) to the mesh, the `inject` method applies a function to the mesh nodes, the `leafs` and `root` methods return a Generator of the leaf cells and the root cell of the mesh, respectively, and the `save` method exports the mesh structure and data to a VTK file.
 
 These methods strongly rely on the `Node` class, which represents the mesh nodes.
 
 **Node**:
 - The `Node` class represents the mesh nodes and contains methods for node initialization, data storage and much more.
-- A `Node` instance is defined by its value, its level in the mesh hierarchy, its parent node reference and its relative origin. The origin is set to the top-left corner of the cell and it is relative to the parent cell's origin. Hence, each individual node has its own referential system with children nodes of relative size 1 in any direction.
-- The `Node` instance children are stored in a dictionary with keys corresponding to the relative position of the child node in the parent cell. This allows for a quick access to the children nodes and ensures a constant time complexity for the access operation.
-- An important, yet subtle implementation detail in the `Node` class is the `__slots__` attribute. This attribute is used to define the class attributes and optimize the memory usage of the class instances. By defining the `__slots__` attribute, the class instances do not store a dictionary of attributes, but rather a tuple of values. This reduces the memory overhead of the class instances and allows for a more efficient memory usage as the number of instances grows.
-- The `Node` class provides a `shall_refine` method that evaluates an argument-given criteria against the node and ensures that a hypothetical refinement does not lead any greater than one level difference. The `shall_coarsen` method does the same for the coarsening operation.
+- A `Node` instance is defined by its value, its level in the mesh hierarchy, its parent node reference and its relative origin. The origin is set to the top-left corner of the cell and it is relative to the parent cell's referential. Hence, each individual node has its own referential system with children nodes of relative size 1 in any direction.
+- The `Node` instance children are stored in a dictionary with keys corresponding to the relative origin of the child node in the parent referential. This allows for a quick access to the children nodes and ensures a constant time complexity for the access operation as it is based on the Python dictionary data structure.
+- An important, yet subtle implementation detail in the `Node` class is the `__slots__` attribute. This attribute is used to define the class attributes and optimize the memory usage of the class instances. By defining the `__slots__` attribute, the class instances do not store a dictionary of attributes, but rather a tuple of values. This reduces the memory overhead of the class instances and allows for a more efficient memory usage as the number of instances grows. The instances are said to be statically allocated and the memory usage is reduced to the minimum required by the class attributes. This optimization is critical in the project as the number of nodes grows exponentially with the mesh resolution and the memory usage must be optimized to handle large meshes efficiently.
+- The `Node` class provides a `shall_refine` method that evaluates an argument-given criteria against the node and ensures that a hypothetical refinement does not lead to any greater than one level difference with its surrounding neighboring cells. The `shall_coarsen` method does the same for the coarsening operation.
 - The `Node` class provides a `refine` method that is used to split the node into smaller nodes. It is used by the `Mesh` class to refine the mesh structure and assumes that the node is, indeed, marked for refinement, hence the method does not evaluate the refinement criteria. The method creates and stores the children nodes in the node's children dictionary. The method also redistributes the node's value to its children nodes using a linear interpolation using the neighboring nodes' values (of same level or greater). The node's value is then set to the average of its children nodes' values. The `Node` class also provides a `coarsen` method that deletes the children nodes and redistributes the node's value to its parent node. The method is used by the `Mesh` class to coarsen the mesh structure and assumes that the node is, indeed, marked for coarsening, hence the method does not evaluate the refinement criteria.
-- The `Node` class provides many *geometrical* and *locality* methods that are extensively used by the project implementation. First, the `absolute_origin` and `absolute_centered_origin` properties recursively compute and return the node's absolute origin and center origin in the global referential system. The `adjacent` method returns the same-referential (common parent) adjacent node given its relative origin in constant time. The `neighbor` method returns the neighboring `Node` instance (when it exists) in an argument-given cardinal direction (defined in the helper `Direction` enumeration class, in the `node.py` file). The neighbor that is, in order, assumed to be an adjacent neighbor, an adjacent neighbor of the parent and finally a child of the parent's adjacent neighbor (in the mirrored direction of that we are searching for). The `buffer` method returns a list of nodes that are within a buffer distance of the node. The buffer distance is defined as the argument-given distance and is assumed to be unit-less. Hence, the distance is assumed to be a number of nodes in any given direction and of whatever level. This method also makes use of the `chain` method that eases the access of neighboring nodes in diagonal directions by chaining the `neighbor` method calls. These different methods are all implemented to ensure a constant time complexity as they are critical in every step of the mesh refinement process. This time complexity is enabled by storing the parent reference and children references in the `Node` instances and by using the relative origin to access the children nodes. In reality, the Python dictionnary access operation is of constant **average** time complexity and may only be linear if the hash function leads to many collisions. However, the low number of keys in the children dictionary ensures a low probability of collision and a constant time complexity in practice.
+- The `Node` class provides many *geometrical* and *locality* methods that are extensively used by the project implementation. First, the `absolute_origin` and `absolute_centered_origin` properties recursively compute and return the node's absolute origin and center origin in the global referential system. The `adjacent` method returns the local-referential (common parent) adjacent node given its relative origin in constant time. The `neighbor` method returns the neighboring `Node` instance (when it exists) in an argument-given cardinal direction (defined in the helper `Direction` enumeration class, in the `node.py` file). The neighbor that is, in order, assumed to be an adjacent neighbor, an adjacent neighbor of the parent and finally a child of the parent's adjacent neighbor (in the mirrored direction of that we are searching for). The `buffer` method returns a list of nodes that are within a buffer distance of the node. The buffer distance is defined as the argument-given distance and is assumed to be unit-less. Hence, the *distance* is assumed to be a number of nodes in any given direction and of whatever level. This method also makes use of the `chain` method that eases the access of neighboring nodes in diagonal directions by chaining the `neighbor` method calls. These different methods are all implemented to ensure a constant time complexity as they are critical in every step of the mesh refinement process. This time complexity is enabled by storing the parent reference and children references in the `Node` instances and by using the relative origin to access the children nodes. In reality, the Python dictionnary access operation is of constant **average** time complexity and may only be linear in worst case if the hash function leads to many collisions. However, the low number of keys (4 in a Quadtree structure and 8 in a Octree structure) in the children dictionary ensures a close to zero probability of collision and a constant time complexity in practice.
 - The `Node` class also provides different helper methods and properties which are used in the `Mesh` class.
 
-These methods are implemented to both handle 2D and 3D meshes and hence support the Octree and Quadtree data structures and its associated operations.
+The basic AMR logic is well implemented for both 2D and 3D meshes and hence supports the Quadtree and Octree data structures.
+The, as described, *geometrical* and *locality* methods, sadly, are not implemented for 3D meshes and the Octree data structure. This is due to the extra complexity of the 3D space and the Octree data structure. The implementation is, however, easily extensible to support 3D meshes and the Octree data structure by implementing the methods accordingly.
+This logic is further needed for numerical schemes that require a more complex neighborhood access and geometrical operations in the 3D space.
 
 
 **Refinement**:
-- The `RefinementCriterium` class represents the refinement criteria. It contains an abstract method, `eval`, that must be implemented by subclasses to define the refinement criteria logic and a helper static method `handle_neighbor` further used in gradient computation due to the interpolation need.
+- The `RefinementCriterium` class represents the refinement criteria. It contains an abstract method, `eval`, that must be implemented by subclasses to define the refinement criteria logic, and a helper static method `handle_neighbor` that is used in gradient computation due to the need for interpolation.
 - A concrete implementation of the `RefinementCriterium` class is provided with the `CustomRefinementCriterium` class. A custom function that is evaluated against a `Node` instance is provided to the class constructor and is used in the `eval` method to evaluate the refinement criteria. The `CustomRefinementCriterium` class is used in the project to quickly define a refinement criteria based on a custom function or bypass the refinement criterium, as done in the stripe-neighboring nodes refinement process.
 - The `GradientRefinementCriterium` implements a concrete implementation of the `RefinementCriterium` class. It implements a first-order two-dimensional gradient approximation using the interpolated neighboring nodes' values. Its scaled magnitude is then evaluated against a user-defined threshold to determine if said node shall be refined. A similar concrete implementation class `LogScaleGradientRefinementCriterium` is also provided to evaluate the log-scale gradient against a user-defined threshold. The log-scale allows for a greater sensitivity to small values and a better representation of the gradient's magnitude. It is used in the project to define a refinement criteria based on the temperature gradient of the heat diffusion problem.
 
@@ -132,7 +134,7 @@ This implementation, though, lacks support for 3D meshes and the Octree data str
 - A concrete implementation of the `NumericalScheme` class is provided with the `SecondOrderCenteredFiniteDifferences` class. It implements a second-order centered finite differences scheme and Neumann boundaries as the domain is assumed to be conservative. The scheme is applied to the mesh nodes in the `Mesh` class to compute the temperature field at the next time step in the `solve` method.
 
 This abstract class is used to define the numerical scheme and allows for a flexible and extensible implementation of different numerical schemes based on the user's needs.
-This implementation sadly lacks support for 3D meshes and the Octree data structure due to the two-dimensional gradient calculation. It is, however, easily extensible to support 3D meshes and the Octree data structure by implementing the `apply` method accordingly.
+This implementation sadly lacks support for 3D meshes and the Octree data structure due to the two-dimensional gradient calculation (in the Laplacian). It is, however, easily extensible to support 3D meshes and the Octree data structure by implementing the `apply` method accordingly.
 
 
 **Benchmark**:
@@ -228,18 +230,18 @@ PARLER DES PERFORMANCES DU SLOTTING ICI ?
 
 Implementing the parallelization of the algorithm could be a potential optimization to further improve the performance of the simulation. By parallelizing the mesh refinement process, the algorithm could take advantage of multi-core processors and distribute the workload across multiple threads. This would allow for a more efficient use of computational resources and reduce the overall simulation time.
 
-The following table provides a comparison of time and space usage when running a heat transfer simulation with and without adaptive mesh refinement (10s diffusion, 0.01s delta) :
+The following table provides a comparison of time and space usage when running a heat transfer simulation of a continuous heat source with and without adaptive mesh refinement (10s simulation time, 0.01s delta):
 
-*Please note that the resolution of the uniform mesh (256 cells per dimension) is the maximum number of cells per dimension the adaptive mesh refinement algorithm can reach (starts at 64 cells per dimension).*
+*Please note that the resolution of the uniform mesh (256 cells per dimension) is the maximum number of cells per dimension the adaptive mesh refinement algorithm can reach (starts at 64 cells per dimension). The Uniform Mesh used for reference is implemented using the Quadtree data structure as implemented in the project.*
 
 | Method                    | Average Total Time (s)      | Average Memory Usage (MB)  |
 |--------------------------|----------------------------|---------------------------|
-| Adaptive Mesh Refinement | 22.0 ± 0.31               | 4.251 ± 0.473            |
 | Uniform Mesh             | 433.4 ± 7.382             | 50.578 ± 13.736          |
+| Adaptive Mesh Refinement | 22.0 ± 0.31               | 4.251 ± 0.473            |
 
 *The simulation has been ran 10 times, on an Intel Core i9-9980HK CPU @ 2.40GHz with 32 GB of RAM (Ubuntu 24.04)*
 
-The results show a significant improvement in both time and memory usage when using adaptive mesh refinement compared to a uniform mesh. The adaptive mesh refinement algorithm allows for a more efficient use of computational resources but comes with a tradeoff as the solution may not be as accurate as a uniform mesh solution.
+The results show a significant improvement in both time (~19.7x) and memory usage (~11.9x) when using adaptive mesh refinement compared to a uniform mesh. The adaptive mesh refinement algorithm allows for a more efficient use of computational resources but comes with a tradeoff as the solution may not be as accurate as a uniform mesh solution.
 
 - Complexity analysis
 - Benchmarks
