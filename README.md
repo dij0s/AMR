@@ -119,7 +119,7 @@ The *adaptive mesh refinement algorithm* can be described as follows:
 
 The equation that governs the heat transfer problem is the heat diffusion equation:
 
-$\frac{\partial T}{\partial t} = \frac{\lambda}{\rho c_p} \left(\frac{\partial^2 T_n}{\partial x^2} + \frac{\partial^2 T_n}{\partial y^2}\right)$
+$$\frac{\partial T}{\partial t} = \frac{\lambda}{\rho c_p} \left(\frac{\partial^2 T_n}{\partial x^2} + \frac{\partial^2 T_n}{\partial y^2}\right)$$
 
 where $T$ is the temperature field, $\lambda$ is the thermal conductivity, $\rho$ is the density, $c_p$ is the specific heat capacity at constant pressure, and $T_n$ is the temperature at the current time step.
 
