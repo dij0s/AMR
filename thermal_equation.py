@@ -38,10 +38,10 @@ def simulation():
     MIN_RELATIVE_DEPTH: int = (
         -3
     )  # minimum depth of the tree (relative to the base cell)
-    MAX_RELATIVE_DEPTH: int = 1  # maximum depth of the tree (relative to the base cell)
+    MAX_RELATIVE_DEPTH: int = 2  # maximum depth of the tree (relative to the base cell)
 
     # spatial
-    N: int = 32  # number of cells per dimension
+    N: int = 16  # number of cells per dimension
     LX: float = 10.0  # length of the domain in x [m]
     LY: float = 10.0  # length of the domain in y [m]
     DX: float = LX / (
@@ -63,9 +63,6 @@ def simulation():
     record_interval: int = N_STEPS // N_RECORDS  # interval between records
 
     # material
-    # RHO: float = 1.204  # density [kg/m^3]
-    # CP: float = 1004.0  # specific heat capacity [J/kg/K]
-    # LAMBDA: float = 0.026  # thermal conductivity [W/m/K]
     RHO: float = 0.06  # density [kg/m^3]
     CP: float = 404.0  # specific heat capacity [J/kg/K]
     LAMBDA: float = 0.026  # thermal conductivity [W/m/K]

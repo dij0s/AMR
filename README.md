@@ -34,19 +34,15 @@ The results are validated by comparing them with a reference solution obtained u
 
 The following sections provide a detailed overview of the project.
 
-
 &nbsp;
-
-
-The project is implemented using [Python 3.12](https://www.python.org/downloads/release/python-3120/).
 
 *Please see the [Running the project](#running-the-project) section below for running instructions.*
 
 
 ## Table of Contents
-1. [Overview](#overview)
-2. [Author & Acknowledgments](#author--acknowledgments)
-3. [Technical Documentation](#technical-documentation)
+[Overview](#overview)
+[Author & Acknowledgments](#author--acknowledgments)
+[Technical Documentation](#technical-documentation)
    - [Project Structure](#project-structure)
    - [Algorithm Description](#algorithm-description)
    - [Code Architecture](#code-architecture)
@@ -55,14 +51,16 @@ The project is implemented using [Python 3.12](https://www.python.org/downloads/
      - [Refinement](#refinement)
      - [Scheme](#scheme)
      - [Benchmark](#benchmark)
-4. [Running the project](#running-the-project)
+[Running the project](#running-the-project)
    - [Modifying the simulation](#modifying-the-simulation)
    - [Running the validation](#running-the-validation)
    - [Running the tests](#running-the-tests)
-5. [Performance and results](#performance-and-results)
-6. [Conclusion](#conclusion)
-7. [License](#license)
-8. [References](#references)
+[Visualizing the simulation](#visualizing-the-simulation)
+[Performance and results](#performance-and-results)
+[Conclusion](#conclusion)
+[Future Work](#future-work)
+[License](#license)
+[References](#references)
 
 
 ## Author & Acknowledgments
@@ -101,7 +99,7 @@ The overall *simulation algorithm* can be broken down into the following steps:
    - Iterate over time steps until the final time is reached.
 
 3. Solve the Heat Equation:
-    - Compute the heat diffusion equation using finite differences.
+    - Compute the heat diffusion equation using a finite differences numerical scheme.
     - Update the temperature field based on the computed values.
 
 4. Adaptive Mesh Refinement (only done every few iterations):
@@ -117,6 +115,16 @@ The *adaptive mesh refinement algorithm* can be described as follows:
 2. Compare the indicator with a threshold to decide whether or not to refine the cell.
 3. Refine the cell and its neighboring cells by splitting it into smaller cells or coarsen it by merging it with neighboring cells.
 4. Update the mesh structure and redistribute the temperature values accordingly.
+
+The equation that governs the heat transfer problem is the heat diffusion equation:
+
+$\frac{\partial T}{\partial t} = \frac{\lambda}{\rho c_p} \left(\frac{\partial^2 T_n}{\partial x^2} + \frac{\partial^2 T_n}{\partial y^2}\right)$
+
+where $T$ is the temperature field, $\lambda$ is the thermal conductivity, $\rho$ is the density, $c_p$ is the specific heat capacity at constant pressure, and $T_n$ is the temperature at the current time step.
+
+This description provides a high-level overview of the algorithm and its main components.
+
+The more detailed implementation of the algorithm is described in the following sections.
 
 ### Code Architecture
 
@@ -182,7 +190,7 @@ This implementation, though, lacks support for 3D meshes and the Octree data str
 
 **Scheme**:
 - The `NumericalScheme` class represents the numerical scheme solver and contains an `apply` method that must be implemented by subclasses to define the numerical scheme logic that is applied to an argument-given list of nodes.
-- A concrete implementation of the `NumericalScheme` class is provided with the `SecondOrderCenteredFiniteDifferences` class. It implements a second-order centered finite differences scheme and Neumann boundaries as the domain is assumed to be conservative. The scheme is applied to the mesh nodes in the `Mesh` class to compute the temperature field at the next time step in the `solve` method.
+- A concrete implementation of the `NumericalScheme` class is provided with the `SecondOrderCenteredFiniteDifferences` class. It implements a second-order centered finite differences numerical scheme and Neumann boundaries as the domain is assumed to be conservative. The scheme is applied to the mesh nodes in the `Mesh` class to compute the temperature field at the next time step in the `solve` method.
 
 This abstract class is used to define the numerical scheme and allows for a flexible and extensible implementation of different numerical schemes based on the user's needs.
 This implementation sadly lacks support for 3D meshes and the Octree data structure due to the two-dimensional gradient calculation (in the Laplacian). It is, however, easily extensible to support 3D meshes and the Octree data structure by implementing the `apply` method accordingly.
@@ -197,19 +205,23 @@ This implementation sadly lacks support for 3D meshes and the Octree data struct
 This class is used to measure the performance of the simulation and allows for a quick and easy way to compare different implementations or configurations.
 
 
-## Running the project
-The project has been developed in Python using [uv](https://astral.sh/blog/uv):
-> *uv is an extremely fast Python package installer and resolver, written in Rust, and designed as a drop-in-replacement for pip and pip-tools workflows.*, Charlie Marsh
+## Running the project.
+The project has been developed in Python using [uv](https://astral.sh/blog/uv) and [Python 3.12](https://www.python.org/downloads/release/python-3120/):
+> *uv is an extremely fast Python package installer and resolver, written in Rust, and designed as a drop-in-replacement for pip and pip-tools workflows.* - Charlie Marsh, founder of Astral and creator of uv
 
-I recommend using `uv` to run the project as it allows for a fully reproducible environment.
+I recommend using `uv` to run the project as it allows for a fully reproducible environment and ensures that the project dependencies (as well as Python itself) are installed in a virtual environment.
 
 To install `uv`, follow the instructions on the [official website](https://docs.astral.sh/uv/getting-started/installation/#installation-methods).
 
-After installing `uv`, you can simply run the project using the following command, at the root of the project directory:
+*Please make sure that you correctly installed `uv` and that it is available in your PATH before running the project.*
+
+After everything is setup, you can simply run the heat transfer simulation using the following command, from the root directory of the project:
 
 ```bash
 uv run thermal_equation.py
 ```
+
+This is possible as the dependencies are defined in the `pyproject.toml` file and are automatically installed by `uv` when running the script. The Python version is also defined in the `pyproject.toml` file and is automatically installed by `uv` when running the script.
 
 This will execute the main script of the project used to solve the heat transfer problem.
 The script will save the simulation data VTK files in the `output/` directory and display the benchmarking results at the end of the simulation.
@@ -220,7 +232,14 @@ One can also provide an extra argument to the script to specify the number of it
 uv run thermal_equation.py 10 # Run for 10 iterations
 ```
 
-It provides an easy way to run a simulation multiple times which can be useful for benchmarking and validation purposes.
+It provides an easy way to run a simulation multiple times which can be useful for performance and benchmarking assessments.
+
+One could also run the script using Python (version >= 3.12) after installing the dependencies directly with `pip`:
+
+```bash
+pip install psutil>=6.1.0 pytest>=8.3.4 # Install dependencies
+python thermal_equation.py # Run the script
+```
 
 ### Modifying the simulation
 
@@ -233,7 +252,7 @@ MIN_RELATIVE_DEPTH: int = -3  # minimum depth of the tree (relative to the base 
 MAX_RELATIVE_DEPTH: int = 2  # maximum depth of the tree (relative to the base cell)
 
 # spatial
-N: int = 64  # number of cells per dimension
+N: int = 16  # number of cells per dimension
 LX: float = 10.0  # length of the domain in x [m]
 LY: float = 10.0  # length of the domain in y [m]
 
@@ -245,12 +264,12 @@ N_RECORDS: int = 200  # number of records to save
 
 # material
 RHO: float = 0.06  # density [kg/m^3]
-CP: float = 204.0  # specific heat capacity [J/kg/K]
-LAMBDA: float = 1.026  # thermal conductivity [W/m/K]
+CP: float = 404.0  # specific heat capacity [J/kg/K]
+LAMBDA: float = 0.026  # thermal conductivity [W/m/K]
 ```
 
 For visualization purposes, the script does not, by default, check that the stability conditions are met.
-One can easily make sure that the stability conditions are met by uncommenting the following lines:
+One can easily make sure that the stability conditions are met by uncommenting the following lines in the script:
 
 ```python
 # check stability condition
@@ -339,6 +358,22 @@ uv run pytest
 The tests are also automatically run as the code is pushed to the repository using GitHub Actions.
 
 
+## Visualizing the simulation
+
+The simulation outputs VTK files in the `output/` directory that can be visualized using various tools. We recommend using either:
+
+- [VisIt](https://visit-dav.github.io/visit-website/): An open-source visualization platform developed by Lawrence Livermore National Laboratory
+- [ParaView](https://www.paraview.org/): An open-source, multi-platform data analysis and visualization application
+
+I personally made use of VisIt to visualize the simulation data and the mesh structure. One can easily visualize the simulation data by following these steps:
+1. Launch VisIt
+2. File > Open file > Navigate to the `output/` directory
+3. Select the VTK files
+4. Choose "Pseudocolor" plot of the **value** field
+5. Click "Draw"
+
+The first image in this document shows the simulation at different time steps: t₀ (initial state), t₁ and t₂ (intermediate states), and finally t_end (final state). During these time steps, the temperature field gradually diffuses outward from the central heat source as the mesh dynamically adapts to capture the evolving temperature gradients.
+
 ## Performance and results
 
 This section provides an overview of the performance considerations and optimizations used in the project.
@@ -356,7 +391,7 @@ As per data storage, the physical locality (in RAM) of the mesh structure would 
 Both time and space complexity aren't optimized further as it is not the main focus of the project and the implementation is already efficient enough for the problem at hand.
 
 
-The following table provides a comparison of time and space usage when running a heat transfer simulation of a continuous heat source with and without adaptive mesh refinement (10s simulation time, 0.01s delta, 20 refinement steps):
+The following table provides a comparison of time and space usage when running a heat transfer simulation of a continuous heat source with and without adaptive mesh refinement (10s simulation time, 0.01s delta, 20 refinement steps with a high conductivity material - more refinements):
 
 | Method                    | Average Total Time (s)      | Average Memory Usage (MB)  |
 |--------------------------|----------------------------|---------------------------|
@@ -369,7 +404,7 @@ The following table provides a comparison of time and space usage when running a
 
 *Moreover, the Uniform Mesh used for reference is implemented using the Quadtree data structure as implemented in the project.*
 
-The results show a significant improvement in both time (~19.7x) and memory usage (~11.9x) when using adaptive mesh refinement compared to a uniform mesh.
+The results show a significant improvement in both time (~19.7x) and memory usage (~11.9x) when using adaptive mesh refinement compared to a uniform mesh when solving the heat transfer problem with these parameters.
 The most time-consuming part of the simulation is the mesh numerical scheme solver, which is applied to each cell in the mesh and accounts for approximately 90% of the total time in both cases.
 
 In the adaptive mesh refinement case, the refinement process accounts for ~4.7% of the total time and is responsible for the increased efficiency of the algorithm by reducing the number of cells that need to be solved. It is only done every 50 iterations, which allows for a more efficient use of computational resources and a faster simulation time.
@@ -379,9 +414,9 @@ The adaptive mesh refinement algorithm allows for a more efficient use of comput
 When running the [comparison script](#running-the-validation) for both an AMR simulation with a maximum of 2 levels of refinement and an AMR simulation with a maximum of 1 level of refinement against a Uniform Mesh simulation (64 cells per dimension), the following results are obtained:
 
 | Method | Average RMSE (Root Mean Square Error) [°C] | Average Relative Error [%] | Total Time [s] |
-|--------|------------------|-------------------| -- |
-| +1 level AMR (32-64 cells per dimension) | 0.222 ± 0.935 | 0.428 ± 0.302 | 118 |
-| +2 level AMR (16-64 cells per dimension) | 0.397 ± 1.110 | 0.756 ± 0.425 | 135 |
+|--------|------------------|-------------------| --------------- |
+| +1 level AMR (32-64 cells per dimension) | 0.222 ± 0.935 | 0.428 ± 0.302 | 131 |
+| +2 level AMR (16-64 cells per dimension) | 0.397 ± 1.110 | 0.756 ± 0.425 | 133 |
 
 At first glance, the results show that the AMR simulation with a maximum of 1 level of refinement provides a more *accurate* solution when compared to the Uniform Mesh simulation, with a lower RMSE and relative error.
 However, this greater similarity to the reference uniform mesh may be due to several factors.
@@ -394,16 +429,33 @@ The adaptive mesh refinement algorithm, on the other hand, allows for a higher r
 
 The fact that, when initialized, the heat source is of lower resolution than the uniform mesh (4x smaller) also explains why the AMR simulation with a maximum of 1 level of refinement provides a more similar solution compared to the 2-level refinement one.
 
-In conclusion, the adaptive mesh refinement simulation may provide a more accurate solution to the heat transfer problem by focusing computational resources on regions of interest and reducing the overall computational cost. The tradeoff between performance and precision appears to be a key consideration when using AMR methods and should be carefully evaluated based on the specific requirements of the problem.
+The two AMR simulations perform similarly in terms of computation time, demonstrating that the problem's scaling depends primarily on the maximum number of cells per dimension, as this resolution is applied near the heat source. However, this scaling behavior is also strongly influenced by the physical properties of the material, the rate of heat diffusion, and the characteristics of the heat source itself.
 
-- Complexity analysis
-- Total time consideration here above ?
-- Validation results
-- Visualization of example outputs
+In conclusion, the adaptive mesh refinement simulation provides a more accurate solution to the heat transfer problem by focusing computational resources on regions of interest while reducing the overall computational cost. The tradeoff between performance - which is negligibly better in the +1 level AMR simulation due to reduced mesh solving time - and precision appears to be a key consideration when using AMR methods and should be carefully evaluated based on the specific requirements of the problem.
 
 
 ## Conclusion
-This project has been an enriching journey, providing deep insights into adaptive mesh refinement techniques and their practical implications. Through implementation, I gained a thorough understanding of both the advantages and limitations of AMR methods. While AMR offers significant computational benefits, I learned how it also introduces complexities around mesh quality, refinement strategies, and solution accuracy. Exploring these tradeoffs between performance and precision has given me valuable perspective on numerical methods and scientific computing.
+
+While I managed to understand and implement the main components of the project quite fast, I faced challenges in determining the self-directed evolution of the project. The core AMR algorithm and data structures came together smoothly, but identifying meaningful ways to extend and enhance the implementation, on my own, required more deliberate exploration.
+This highlighted the importance of having clear project goals and milestones beyond the initial implementation phase.
+
+One key learning was recognizing earlier the critical role of comprehensive testing - while I did implement a test suite, setting up even more extensive tests from the start would have enabled faster and more confident iteration.
+
+Nevertheless, working through this uncertainty helped me develop a more structured approach to problem-solving and a deeper appreciation for the iterative nature of software development. Testing has proven essential for maintaining reliability while making incremental improvements.
+
+This project has been an enriching journey, providing deep insights into adaptive mesh refinement techniques and their practical implications. Through implementation, I gained a thorough understanding of both the advantages and limitations of AMR methods.
+
+While AMR offers significant computational benefits, I learned how it also introduces complexities around mesh quality, refinement strategies, and solution accuracy. Exploring these tradeoffs between performance and precision has given me valuable perspective on numerical methods and scientific computing.
+
+
+## Future Work
+
+The project lays a solid foundation for further exploration and development of adaptive mesh refinement techniques. Here are some potential areas for future work:
+- **3D Mesh Support**: Extending the implementation to support 3D meshes and the Octree data structure would allow for more complex simulations and a more accurate representation of the physical field.
+- **Parallelization**: Implementing parallelization of the algorithm would allow for a more efficient use of computational resources and reduce the overall simulation time.
+- **Advanced Refinement Criteria**: Implementing more advanced refinement criteria based on physical properties or solution characteristics could improve the accuracy of the solution and reduce the computational cost.
+- **Optimization Techniques**: Exploring optimization techniques such as memory management, data storage, and access patterns could further improve the performance of the algorithm and reduce the memory usage.
+
 
 ## License
 This project is licensed under the Creative Commons Attribution 4.0 International License (CC BY 4.0). You are free to:
@@ -430,6 +482,9 @@ Moreover, I made use of the following resources to deepen my understanding of th
 
 **Truncation error (numerical integration)**. (2022). In *Wikipedia*. [Link](https://en.wikipedia.org/w/index.php?title=Truncation_error_(numerical_integration)&oldid=1077302811)
 
+**Claude 3.5 Sonnet**. (2024). *Code review, documentation suggestions, and technical writing assistance for AMR implementation*. Anthropic.
+
+I made use of an AI assistant, Claude 3.5 Sonnet, to assist in the development of the project. Claude provided code review and feedback on the implementation, helping to identify and resolve issues in the algorithm.
 
 The project is an original work developed as part of the HES-SO Valais-Wallis curriculum. Please note that it is intended for educational purposes only and should not be used for commercial or production purposes without proper validation and testing.
 If you have any questions or need further information, please feel free to contact me at [dion(dot)osmani(at)students(dot)hevs(dot)ch](mailto:dion.osmani@students.hevs.ch).
