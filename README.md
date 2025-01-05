@@ -210,7 +210,7 @@ This class is used to measure the performance of the simulation and allows for a
 The project has been developed in Python using [uv](https://astral.sh/blog/uv) and [Python 3.12](https://www.python.org/downloads/release/python-3120/):
 > *uv is an extremely fast Python package installer and resolver, written in Rust, and designed as a drop-in-replacement for pip and pip-tools workflows.* - Charlie Marsh, founder of Astral and creator of uv
 
-I recommend using `uv` to run the project as it allows for a fully reproducible environment and ensures that the project dependencies (as well as Python itself) are installed in a virtual environment.
+I recommend using `uv` to run the project as it allows for a fully reproducible environment and ensures that the project dependencies (as well as Python itself) are installed correctly.
 
 To install `uv`, follow the instructions on the [official website](https://docs.astral.sh/uv/getting-started/installation/#installation-methods).
 
@@ -269,7 +269,7 @@ CP: float = 404.0  # specific heat capacity [J/kg/K]
 LAMBDA: float = 0.026  # thermal conductivity [W/m/K]
 ```
 
-For visualization purposes, the script does not, by default, check that the stability conditions are met.
+By default, the script does not check that the stability conditions are met.
 One can easily make sure that the stability conditions are met by uncommenting the following lines in the script:
 
 ```python
@@ -318,6 +318,8 @@ from src.refinement import CustomRefinementCriterium
 criterium = CustomRefinementCriterium(lambda node: node.value > 0.5)
 ```
 
+Many more modifications can be done to the script to adapt the simulation to your needs.
+
 ### Running the validation
 
 A script is provided to compare and validate the simulation data with a reference simulation data obtained using a uniform mesh.
@@ -356,7 +358,7 @@ To run the tests, you can use the following command from the root directory :
 uv run pytest
 ```
 
-The tests are also automatically run as the code is pushed to the repository using GitHub Actions.
+The tests are also automatically ran as the code is pushed to the repository using GitHub Actions.
 
 
 ## Visualizing the simulation
@@ -373,7 +375,11 @@ I personally made use of VisIt to visualize the simulation data and the mesh str
 4. Choose "Pseudocolor" plot of the **value** field
 5. Click "Draw"
 
-The first image in this document shows the simulation at different time steps: t₀ (initial state), t₁ and t₂ (intermediate states), and finally t_end (final state). During these time steps, the temperature field gradually diffuses outward from the central heat source as the mesh dynamically adapts to capture the evolving temperature gradients.
+One can also visualize the gradient field by creating a new plot and selecting the **gradient** field, in "Pseudocolor".
+
+The first image in this document shows the simulation at different time steps: $t_0$ (initial state), $t_1$ and $t_2$ (intermediate states which show clear refinement), and finally, the final state $t_\text{end}$.
+
+During these time steps, the temperature field gradually diffuses outward from the central heat source as the mesh dynamically adapts to capture the evolving temperature gradients.
 
 ## Performance and results
 
