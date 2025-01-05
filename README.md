@@ -40,9 +40,10 @@ The following sections provide a detailed overview of the project.
 
 
 ## Table of Contents
-[Overview](#overview)
-[Author & Acknowledgments](#author--acknowledgments)
-[Technical Documentation](#technical-documentation)
+
+- [Overview](#overview)
+- [Author & Acknowledgments](#author--acknowledgments)
+- [Technical Documentation](#technical-documentation)
    - [Project Structure](#project-structure)
    - [Algorithm Description](#algorithm-description)
    - [Code Architecture](#code-architecture)
@@ -51,16 +52,16 @@ The following sections provide a detailed overview of the project.
      - [Refinement](#refinement)
      - [Scheme](#scheme)
      - [Benchmark](#benchmark)
-[Running the project](#running-the-project)
+- [Running the project](#running-the-project)
    - [Modifying the simulation](#modifying-the-simulation)
    - [Running the validation](#running-the-validation)
    - [Running the tests](#running-the-tests)
-[Visualizing the simulation](#visualizing-the-simulation)
-[Performance and results](#performance-and-results)
-[Conclusion](#conclusion)
-[Future Work](#future-work)
-[License](#license)
-[References](#references)
+- [Visualizing the simulation](#visualizing-the-simulation)
+- [Performance and results](#performance-and-results)
+- [Conclusion](#conclusion)
+- [Future Work](#future-work)
+- [License](#license)
+- [References](#references)
 
 
 ## Author & Acknowledgments
